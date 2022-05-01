@@ -17,13 +17,32 @@
             scene.add(cube);
             camera.position.z = 5;
 
-            function animate() {
-                requestAnimationFrame(animate);
+            //event listeners
+            window.addEventListener('resize',on_window_resize, false);
+            function on_window_resize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
 
+            function render() {
                 cube.rotation.x += 0.01;
                 cube.rotation.y += 0.01;
 
                 renderer.render(scene, camera);
+            }
+
+            let clock = new THREE.Clock();
+            let delta = 0;
+            let interval = 1/30;
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                delta += clock.getDelta();
+                if (delta > interval) {
+                    render();
+                }
             }
             animate();
         </script>
