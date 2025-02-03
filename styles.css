@@ -1,0 +1,52 @@
+body {
+    width:70%;
+    margin: 0 auto;
+    background: linear-gradient(to top, #000000, #000000, #333333, #333333);
+    background-size: cover;
+    background-size: 100% 1px;
+}
+
+#header {
+    width: 100%;
+    font-family: monospace;
+    font-size: 15px;
+    text-align: center;
+    color: orange;
+    filter: blur(.6px);
+    border-bottom: solid orange;
+    padding:10px 0;
+
+    a {
+        font-family: monospace;
+        font-size: 15px;
+        text-align: center;
+        color: orange;
+    }
+}
+
+.article {
+    padding:10px 0;
+    
+    h2 {
+        font-family: monospace;
+        font-size: 20px;
+        color: orange;
+        filter: blur(.6px);
+        border-bottom: dashed orange;
+        padding:10px 0;
+    }
+
+    img {
+        display: block;
+        margin:auto;
+    }
+
+    p {
+        font-family: monospace;
+        font-size: 15px;
+        text-align: left;
+        color: orange;
+        filter: blur(.6px);
+    }
+}
+

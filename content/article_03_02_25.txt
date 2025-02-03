@@ -1,0 +1,8 @@
+
+<h2>Update</h2>
+
+<img src="content/placeholder.png"/>
+
+<p>
+I am currently redesigning this website.
+</p>

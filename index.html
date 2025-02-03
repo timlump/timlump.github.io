@@ -1,74 +1,36 @@
-<html>
+<!doctype html>
+<html lang="en">
     <head>
-        <title>Tim Costigan's website</title>
+        <meta charset="utf-8"/>
+        <title>timcostigan.com</title>
+        <link rel="stylesheet" href="styles.css" />
     </head>
-    <body style="background-color:black">
-        <script src="js/three.js"></script>
+    <body>
+        <div id="header">
+            <h1>
+                timcostigan.com
+            </h1>
+            <a href="https://github.com/timlump">github</a>
+            <a href="https://www.linkedin.com/in/%F0%9F%92%BB-timothy-costigan-63272a27/">LinkedIn</a>
+        </div>
         <script>
-            // setup
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({antialias: true});
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-            const geometry = new THREE.BoxGeometry();
-            const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-            const cube = new THREE.Mesh(geometry,material);
-            scene.add(cube);
-            camera.position.z = 5;
-
-            const grid_helper = new THREE.GridHelper(50,50);
-            scene.add(grid_helper);
-            grid_helper.position.y = -1;
-
-            // title
-            {
-                var canvas = document.createElement('canvas');
-                var canvas_context = canvas.getContext('2d');
-                canvas.width = 1024;
-                canvas.height = 128;
-                canvas_context.font = '100px Courier';
-                canvas_context.strokeStyle = 'green';
-                canvas_context.strokeText('TimCostigan.com',120,100);
-                var texture = new THREE.CanvasTexture(canvas);
-                var title = new THREE.Mesh(
-                    new THREE.PlaneGeometry(5,0.5),
-                    new THREE.MeshBasicMaterial({
-                        map: texture
-                    })
-                );
-                scene.add(title);
-                title.position.y = 1.5;
-            }
-
-            //event listeners
-            window.addEventListener('resize',on_window_resize, false);
-            function on_window_resize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-
-            function render() {
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
-
-                renderer.render(scene, camera);
-            }
-
-            let clock = new THREE.Clock();
-            let delta = 0;
-            let interval = 1/30;
-
-            function animate() {
-                requestAnimationFrame(animate);
-
-                delta += clock.getDelta();
-                if (delta > interval) {
-                    render();
-                }
-            }
-            animate();
+            fetch('content/index.txt')
+                .then(response => response.text())
+                .then((data) => {
+                    var lines = data.split('\n');
+                    for(let idx = 0; idx < lines.length; idx++) {
+                        var filename = `content/${lines[idx]}`;
+                        console.log(filename);
+                        fetch(filename)
+                            .then(response => response.text())
+                            .then((data) => {
+                                const new_article = document.createElement("div");
+                                new_article.className = 'article';
+                                new_article.innerHTML = data;
+                                document.body.appendChild(new_article);
+                            });
+                    }
+                });
         </script>
     </body>
 </html>
