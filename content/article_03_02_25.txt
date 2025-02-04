@@ -1,8 +1,0 @@
-
-<h2><a href="/?article=article_03_02_25.txt">Update 2</a></h2>
-
-<img src="content/placeholder.png"/>
-
-<p>
-I am currently redesigning this website.
-</p>

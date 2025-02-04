@@ -1,0 +1,25 @@
+
+<h2><a href="/?article=stable_diffusion_on_rpi0.txt">Running stable diffusion on a raspberry pi zero</a></h2>
+
+<p>
+Near the end of 2023 I built a DIY e-ink picture frame using an Inky Impression 7.3" display, some random frame I bought online and a raspberry pi zero W I had lying in a drawer for years.
+I loaded it up with some old video game box art and advertising, programmed a script to change the picture randomly every half hour and left it on my shelf for the next few months.
+</p>
+
+<p>
+Early in 2024 inspired by some of the cool things people were doing online, I decided to try to upgrade it to generate a unique image using AI. The obvious solution would be to use some online service but I decided I wanted it to be entirely offline which was going to be difficult. I was seeing suggestions online that to run stable diffusion I'd need 16GB of RAM but the pi zero only has 512MB and it isn't exactly fast either.
+</p>
+
+<p>
+Thankfully <a href="https://github.com/vitoplantamura/OnnxStream">OnnxStream</a> exists which is an ONNX inference library written with the raspbery pi zero in mind. It specifically mentions the pi zero <b>2</b> which has the same amount of RAM as the one I had although my CPU is 5 times slower. Looking at the documentation, the pi zero 2 could generate a passable image in 29 minutes so with a pi zero 1, I could at least generate a few pictures a day.
+</p>
+
+<p>
+At first I tried to compile OnnxStream and its dependencies on the pi itself but even this took a very long time so I had to cross compile it on my pc. To further speed up results - I only went for 3 steps and opted to use stable diffusion 1.5 instead of stable diffusion XL. I kicked it off with the now ubiquitous prompt of "an astronaut riding a horse on mars" and many hours later returned to see the wonderful picture below:
+</p>
+
+<img src="content/astronaut.png" alt="an astronaut riding a horse on mars"/>
+
+<p>
+While my experiment was successful and in theory I could generate a few pictures a day, meaning my frame would show more pictures than the average picture frame :) I decided not to deploy it for one simple reason - due to the low RAM, the only alternative is to swap memory in and out of disc rapidly for hours on end and since the pi uses a microsd card, I could envisage it reaching its write limit very quickly and prematurely failing.
+</p>
