@@ -1,5 +1,5 @@
 
-<h2>Update</h2>
+<h2><a href="/?article=article_03_02_25.txt">Update 2</a></h2>
 
 <img src="content/placeholder.png"/>
 
