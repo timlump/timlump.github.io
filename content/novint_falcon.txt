@@ -1,0 +1,49 @@
+<h2><a href="/?article=novint_falcon.txt">Getting a Novint Falcon to work on Windows 11</a></h2>
+
+<p>
+Back in 2007 while watching e3 coverage, I learned of a cool new peripheral called the Novint Falcon. It was a futuristic looking 3d haptic controller that could be used to play games like half-life 2 and portal. What do I mean by haptic? Well do you know when you are playing a game and it makes your controller vibrate, that is haptic feedback but this was something much more impressive.
+</p>
+
+<p>
+Using three robotic arms it could supposedly emulate the feeling of touching objects of various textures and could give some serious recoil to in-game gunfire.
+Unfortunately it never seemed to take off and from conversations i've had with people over the years, many seem to have never heard of it or forgotten it existed at all.
+</p>
+
+<p>
+I didn't think I would ever get to try one until Febuary 2024 when I found one! See over covid, I got into collecting retro tech and would regularly scan through eBay listings looking for something interesting. Sadly, most cool things have become real collector's items and have steep asking prices these days, way outside what I would consider reasonable for a hobby purchase. However, the Novint Falcon is practically forgotten and when one appeared for auction I was able to win it uncontested for only a few hundred euro. It even came from somewhere in Europe so shipping was very reasonable!
+</p>
+
+<p>
+A few days later it arrived, in perfect condition:
+</p>
+<img src="content/novint_falcon.jpg" alt="unboxing the novint falcon" width="500px"/>
+
+<p>
+However not all was well. My computer runs on windows 11 and when the Novint came out people would probably have used XP or Vista and when I tried to install the bundled drivers, my computer was not happy. It forced me to disable some security features like core isolation and in general pestered me about the driver although it did work. I was able to install and run the awesome texture demo that I believe I saw back in 2007. Here it is running below:
+</p>
+<img src="content/novint_demo.jpg" alt="playing a tech demo with the falcon" width="500px"/>
+
+<p>
+Having finally gotten to play the demo I can confirm that it really does feel like you are touching the objects on the screen. The demo lets you change the texture of the ball to substances like sandpaper, honey, ice etc. and it genuinely feels correct. You interact by grabbing the little end effector visible in the image above and the three arms move with quite a bit of force to simulate the resistance and texture you would expect.
+</p>
+
+<p>
+Happy that the Novint was working correctly, I was not satisfied with the driver situation. Looking around I saw that some hobbyists had created alternative drivers more recently that I could probably build but I doubt I'd be able to play the demos or half-life 2 with them so I inspected the old drivers more closely and noticed they were just generic FTDI drivers for talking to microcontrollers. I decided to do a little driver brain surgery by downloading the latest FTDI drivers and replacing the innards of the old driver with them. This amazingly worked, I could now play the demos without having to turn off windows security features.
+</p>
+
+<p>
+Next was getting half-life 2 working. I booted it up ... and nothing happened. I looked around online to see what I needed to do ... and I could find nothing. I imagine back in 2007 there were plenty of forums and websites talking about it but many of these sites appear to be long gone and I could only find fragments, like ancient writings referring to long lost works.
+</p>
+
+<p>
+I started to wonder if perhaps any Novint functionality had been in fact removed from half-life 2 which has been updated many times since 2007. Why would they keep code for a controller that nobody has probably used with the game in quite some time? I managed to find enough information that suggested that half-life 2 should automatically detect the Novint on launch so if I watched half-life 2 starting using process monitor I could prove if it was still supported by seeing if the game was looking for any Novint dlls on startup.
+</p>
+
+<p>
+Guess what, it was! It was looking for some dlls in the folder: c:\program files (x86)\novint\falcon\hdal, the folder existed but the dlls didn't. This was the break I needed in the case though. I looked around for HDAL, discovered it was the SDK for the device and I managed to find a later version which did have these dlls. I copied them into the folder and when I next started half-life 2, the Novint lit up and it worked!
+</p>
+<img src="content/novint_hl2.jpg" alt="playing half-life 2 with the falcon" width="500px"/>
+
+<p>
+Playing half-life 2 this way is quite the experience. Apparently at max power (which you can adjust in a new settings menu in-game), the Falcon can give 10 newtons of force which is substantial so using the crowbar can pretty quickly start to hurt and shooting anything full auto has you struggling to hit anything smaller than a barn. It's objectively a bad way to play the game but it is hilarious and unique. <i>If you have the means, I highly recommend picking one up.</i>
+</p>
