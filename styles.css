@@ -58,7 +58,12 @@ body {
         margin:auto;
     }
 
-    p {
+    iframe {
+        display: block;
+        margin:auto;
+    }
+
+    p, li {
         font-family: monospace;
         font-size: 15px;
         text-align: left;

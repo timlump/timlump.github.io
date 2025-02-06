@@ -1,0 +1,51 @@
+<h2><a href="/?article=chorded_keyboard.txt">Playing a computer like an instrument</a></h2>
+
+<p>
+In late 2023 I learned about the MicroWriter. "What is the MicroWriter?" I hear you ask. It was one of the first portable word processors. If you don't know what a word processor is, think of something between an electric typewriter and a computer. They were popular before personal computers became ubiquitous. I don't care about that part of the device though, what I care about is the weird keyboard it uses.
+Watch this clip and you'll know what I mean:
+</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/WtX8urOVx-0?si=AqcBE2mwV80ivUnE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<p>
+If you actually watched the video, you probably now have a pretty good idea of how it works but to summarise it is not unlike a stenotype machine that you might have seen in many courtroom dramas. Stenotypes, operated by stenographers, don't type individual letters but rather multiple letters through the pressing of many keys and pedals simultaneously, forming a chord.
+</p>
+
+<p>
+The MicroWriter is similar to but not as versatile as a stenotype. In particular, it doesn't allow you to enter entire words but instead you type them letter by letter like a normal keyboard. However, it uses chords of up to 5 keys (one of the keys is a modifier key) to do so. I don't think this would allow for the high speeds you'd see with a stenotype and I don't even believe it could beat a conventional keyboard but its easy to learn and for portability, as a compromise over using tiny keys, I could see an argument for using it.
+</p>
+
+<p>
+As I am fascinated by unusual devices like this. I had to try out the concept. So as always I went to eBay, I found one listed for a reasonable price, I placed a bid, waited a few days and right before winning, I was sniped by a higher bidder. So ... I decided to build my own :) I rummaged in my parts bins, found some old key switches and a raspberry pi pico and got to work.
+</p>
+
+<p>
+I didn't want to make an exact copy of the design as not only did I not have the dimensions but it didn't look that ergonomically comfortable so I made my own design. I measured the dimensions of the pico and key switches with my digital calipers, took some rough measurements of my hand to get a feeling for what would be comfortable and began laying it out using Blender:
+</p>
+
+<img src="content/keyboard_mockup_inside.jpg" alt="image of hand over interior of keyboard" width="500px"/>
+
+<p>
+A lot of the inspiration for the outside of the case came from looking at the mouse I was using at that very moment:
+</p>
+<img src="content/keyboard_mockup_full.jpg" alt="image of hand over full keyboard" width="500px"/>
+
+<p>
+Once I was happy with the design, I began printing with an old 3d printer I got back in 2016. It had been stored in an attic for the previous 3 years and was worse for wear but it was able to print the base plate with only minimal warping. I hot glued in my mechanical key switches adorned with key caps from an old keyboard and soldered everything to a header which I attached to the raspberry pi pico:
+</p>
+<img src="content/keyboard_inside.jpg" alt="the base plate wired up" width="500px"/>
+<p>
+I installed a circuit python boot loader onto the pico, added Adafruit's HID library (to make the device show up as a normal keyboard) and OLED driver to control a little screen I added to show the status of the device and then started programming. I wrote a simple but powerful GUI library to draw to the screen with menus, status bars, widgets for showing button states and so on. I implemented the letter combinations of the MicroWriter but also some of my own for navigating a graphical operating system which wouldn't have been a consideration for the original MicroWriter.
+</p>
+<img src="content/keyboard_screen.jpg" alt="the oled screen of the device" width="500px"/>
+<p>
+At this point, everything was working so I went to print the upper case for the device and disaster struck. My 3d printer got jammed at some point in the print and many hours later I returned to see a giant ball of molten plastic surrounding the extruder. The printer was ruined and I had no case for my chorded keyboard. However, I didn't let this stop me. I grabbed some foam boards lying nearby and tried my best with a knife and a copius application of hot glue to approximate the design I had mocked up:
+</p>
+<img src="content/keyboard_rough.jpg" alt="the rough foam case" width="500px"/>
+<p>
+I then covered it in some painters tape that I hastily tried to paint black with a marker to cover up the rough edges, and voilà, I was done.
+</p>
+<img src="content/keyboard_final.jpg" alt="the final device" width="500px"/>
+<p>
+I used this keyboard for a couple of days and it worked, I even plugged it into my Xbox Series X and was able to enter details and navigate menus. The key combinations were intuitive enough to use but it just wasn't very fast. In the end I am happy I didn't win the auction as the real value was building it rather than using it.
+</p>
