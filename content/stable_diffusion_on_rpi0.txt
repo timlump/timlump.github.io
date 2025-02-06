@@ -1,5 +1,5 @@
 
-<h2><a href="/?article=stable_diffusion_on_rpi0.txt">Running stable diffusion on a raspberry pi zero</a></h2>
+<h2><a href="/?article=stable_diffusion_on_rpi0.txt">A picture is worth a thousand words</a></h2>
 
 <p>
 Near the end of 2023 I built a DIY e-ink picture frame using an Inky Impression 7.3" display, some random frame I bought online and a raspberry pi zero W I had lying in a drawer for years.
