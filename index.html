@@ -13,6 +13,8 @@
             <br/>
             <a class="external_link" href="https://github.com/timlump">github</a>
         </div>
+        <table id="page_nav">
+        </table>
         <script>
             function load_article(name) {
                 let filename = `content/${name}`;
@@ -37,12 +39,47 @@
                 load_article(params.get('article'));
             }
             else {
+                const articles_per_page = 2;
+                let current_page = 0;
+                if (params.has('page')) {
+                    current_page = params.get('page');
+                }
+
                 fetch('content/index.txt')
                 .then(response => response.text())
                 .then((data) => {
                     let lines = data.split('\n');
+
+                    let num_pages = lines.length / articles_per_page;
+                    if (num_pages > 1) {
+                        let table = document.getElementById('page_nav');
+                        let row = table.insertRow();
+                        let cell = row.insertCell();
+                        let text = document.createTextNode("Page: ");
+                        cell.appendChild(text);
+                        for (let idx = 0; idx < num_pages; idx++) {
+                            let cell = row.insertCell();
+                            let text = document.createTextNode(`${idx+1}`);
+                            if (idx == current_page) {
+                                cell.appendChild(text);
+                            }
+                            else {
+                                let link = document.createElement('a');
+                                link.href = `/?page=${idx}`;
+                                link.title = `${idx+1}`;
+                                link.appendChild(text);
+                                cell.appendChild(link)
+                            }
+                        }
+                    }
+
                     for(let idx = 0; idx < lines.length; idx++) {
-                        load_article(lines[idx]);
+                        let start_idx = current_page*articles_per_page;
+                        let end_idx = start_idx + articles_per_page;
+                        if (idx >= start_idx && idx < end_idx)
+                        {
+                            load_article(lines[idx]);
+                        }
                     }
                 });
             }

@@ -36,6 +36,27 @@ body {
     }
 }
 
+#page_nav {
+    display: block;
+    margin:auto;
+    font-family: monospace;
+    font-size: 15px;
+    text-align: left;
+    color: orange;
+    filter: blur(.4px);
+
+    a {
+        width: 100%;
+        font-family: monospace;
+        font-size: 15px;
+        text-align: center;
+        color: orange;
+        filter: blur(.4px);
+        padding:10px 0;
+    }
+}
+
+
 .article {
     padding:10px 0;
     
@@ -44,7 +65,6 @@ body {
         font-size: 20px;
         color: orange;
         filter: blur(.4px);
-        border-bottom: dashed orange;
         padding:10px 0;
     }
 
