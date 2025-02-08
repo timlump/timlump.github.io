@@ -2,10 +2,11 @@
 
 <p>
 In late 2023 I learned about the MicroWriter. "What is the MicroWriter?" I hear you ask. It was one of the first portable word processors. If you don't know what a word processor is, think of something between an electric typewriter and a computer. They were popular before personal computers became ubiquitous. I don't care about that part of the device though, what I care about is the weird keyboard it uses.
-Watch this clip and you'll know what I mean:
 </p>
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/WtX8urOVx-0?si=AqcBE2mwV80ivUnE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<p>
+Watch this <a href="https://youtu.be/WtX8urOVx-0?feature=shared">clip</a> and you'll know what I mean.
+</p>
 
 <p>
 If you actually watched the video, you probably now have a pretty good idea of how it works but to summarise it is not unlike a stenotype machine that you might have seen in many courtroom dramas. Stenotypes, operated by stenographers, don't type individual letters but rather multiple letters through the pressing of many keys and pedals simultaneously, forming a chord.
