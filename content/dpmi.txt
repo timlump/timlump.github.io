@@ -1,0 +1,45 @@
+<h2><a href="/?article=dpmi.txt">Getting the most out of DOS</a></h2>
+
+<p>
+In order to get better at debugging, I picked up the excellent book <a href="https://practicalbinaryanalysis.com/">Practical Binary Analysis by Dennis Andriesse</a> and to give myself motivation to actually read it, I chose an old DOS game to apply my skills to, with the ultimate goal of getting it running on a modern system natively, i.e. not running in DOSBOX. I picked a DOS game and not say a windows one, because I know it is a relatively simple operating system and I assumed this would make the process easier. Here is how I was wrong.
+</p>
+
+<p>
+Before I go any further I need to explain what binary analysis is. You can skip the next three paragraphs if you already know.
+</p>
+
+<p>
+Computer programs if you open them up in say, notepad, will probably look like a lot of random gibberish but this is actually machine code and data in an operating system specific executable format - windows uses PE (Portable Executable) and Linux uses ELF (Executable and Linkable Format) for example. There are plenty of tools available to decode these formats and to turn the machine code into something human readable called assembly language.
+</p>
+
+<p>
+Assembly language is usually pretty simple, made up of basic arithmetic commands, commands for moving information around, controlling the state of the cpu and so on. However, it is very difficult to do anything really complex, like making a game, in assembly code because it is so verbose. So, programmers tend to use more powerful, <i>higher level</i> languages like C++ and Python which get automatically turned into machine code using tools like compilers or interpreters. I hope I haven't lost you so far
+</p>
+
+<p>
+If you have access to the <i>higher level</i> source code that an application is written in, you can just read this to understand what the program is doing. If you don't, you need to read the <i>lower level</i> machine code, this tends to need expertise and special tools and is called <b>binary analysis</b>. There we are, now back to the story.
+</p>
+
+<p>
+DOS is a very old operating system, it was first released in 1981 and largely fell out of favour by 1995. This causes two problems, firstly you cannot run DOS applications on modern operating systems, you need to use an emulator like DOSBOX and secondly, many utilities I would like to use were developed long after DOS went away and often don't know what to do with DOS applications. If the game was for windows for example, I could use the tool WinDBG to watch the game running to help understand the code but I don't have this option. 
+</p>
+
+<p>
+Thankfully, DOSBOX does have a debugger but when I used it, something wasn't right. I could follow the execution of the code for a little while but quickly the instructions stopped making sense. It turns out, I had hit an issue that affects programs that came out towards the end of DOS's lifespan, these applications were 32-bit and DOS is 16-bit, the debugger didn't know this hence the confusing output. I won't get into the minutiae but in short, more bits means you can access more memory. Later DOS games got pretty complex and needed more memory than what DOS was designed for. They got around this limitation using DOS extenders.
+</p>
+
+<p>
+You can often tell a game is using an extender when you launch it and you briefly see something on the command line like: <b>DOS/4GW Professional Protected Mode Run-Time</b> before the game starts. In this case, DOS/4GW is the name of the extender (it was probably the most popular one), 4G in the name stands for 4 gigabytes, the amount of memory 32-bits could address and W stands for Watcom which was a popular compiler at the time.
+</p>
+
+<p>
+Applications using extenders have a completely different executable format than DOS's MZ format, called LE for Linear Executable (there is a variant called LX too) which was originally created for the now defunct IBM operating system OS/2 and bears a striking resemblence to the executable format used in windows - OS/2 was originally being developed by Microsoft. These executables are wrapped in a extremely small 16-bit DOS application called a stub which simply elevates the processor into 32-bit mode and then loads the LE/LX program. I was able to follow the stub in the DOSBOX debugger but once the bit mode changed I was lost. The 32-bit code is able to talk to the 16-bit operating system through something called the DOS Protected Mode Interface or DPMI.
+</p>
+
+<p>
+This presents a problem - MZ is well documented because DOS was around for such a long time but LE/LX is not. Most tools can't understand it although the reverse engineering tool radare2 surprisingly can. In fact, when you open a DOS extender game in it, it bypasses the stub part of the program and skips straight to the LE/LX part which was not what I was expecting. Radare2 is not enough for this project though, it is a static analysis tool, it helps me read the code but usually you need to run it to fully understand it as many values needed to follow the thread of execution are only calculated at runtime. 
+</p>
+
+<p>
+So I have started creating my own tool to do this, which I will talk about in another article.
+</p>
