@@ -1,0 +1,95 @@
+<h2><a href="/?article=rca1802.txt">Listening to the wires</a></h2>
+
+<p>
+My background is in computer engineering which means in college I had to learn a good bit more about electronics than perhaps a computer science graduate would have. In my day job making software however, I don't have a chance to use any of this knowledge very much, which is sad.
+</p>
+
+<p>
+In my spare time though I figured out a way to do electronics. See, I am a big computer history reader and I find a great way to learn history is to immerse yourself in it, for example, by going to a museum or in the case of computers actually playing with the machines being talked about. Unfortunately, there aren't any computer museums where I live so I had to build my own mini-museum:
+</p>
+
+<img src="content/images/mini_museum.jpg" alt="the mini museum"  width="500px" />
+
+<p>
+I call it the mini-museum because 1) its very small and 2) it only contains small items as I have limited space to store them. It consists of some genuine old products like the programmable HP-41CV calculator (bottom left), a PSION organiser II (far right), a K&E 4081-3 slide rule (lower middle), an Apple Newton (not pictured) and a HP-95LX Palmtop (also not pictured). These will probably all get their own articles later.
+</p>
+
+<p>
+I couldn't get genuine examples of some items because they are extremely rare (and also too big) so I had to get modern replicas like the PiDP-11 which is a raspberry pi based simulation of a PDP-11 (top middle) and an Altair 8800 mini (pictured below) which is arduino based.
+</p>
+
+<img src="content/images/altair_mini.jpg" alt="arduino based altair replica"  width="500px" />
+
+<p>
+But for three items I was able to compromise by building modern kit computers from <a href="https://www.sunrise-ev.com/#microcomputers">sunrise-ev</a>. I built one using an MOS 6502 that was designed to be a cool conference badge, another using an RCA 1802 which is a microprocessor I hadn't heard of before and another using the Intel 8080 which is effectively a pocket sized version of the Altair pictured above.
+</p>
+
+<img src="content/images/three_kits.jpg" alt="three kit computers"  width="500px" />
+
+<p>
+Today we are going to talk a little bit about the middle one, the one using the RCA 1802. The other two you have to connect to a serial cable and communicate over a terminal but the RCA 1802 computer connects to a TV. You are able to interact with it through the rudimentary keyboard of microswitches visible on the top.
+</p>
+
+<p>
+When I finished building this computer and first plugged it into the tiny black and white CRT I keep in my collection, I realised something went wrong during assembly:
+</p>
+
+<img src="content/images/crt_output.jpg" alt="the crt output of the RCA 1802"  width="500px" />
+
+<p>
+The image above should not look like that, you may notice there is a regular pattern of blank vertical lines cutting through the image, we should instead be seeing something more like this (i've corrected the image in paint):
+</p>
+
+<img src="content/images/crt_output_corrected.jpg" alt="the crt output of the RCA 1802 with hand drawn corrections"  width="500px" />
+
+<p>
+Spoiler alert: I didn't actually solve this issue, I moved on to other projects but I did some cool stuff to narrow down where the problem was occurring and may return to it later.
+</p>
+
+<p>
+The kit computer consists of basically four functional parts: the CPU which runs the code, the ROM which stores the code, the RAM which is used as memory for the code and the video circuit which generates the image, all of which are connected along a shared electrical path or BUS:
+</p>
+
+<img src="content/images/rca1802_functional_diagram.png" alt="the basic building blocks of the RCA 1802 computer"  width="500px" />
+
+<p>
+By pressing the keys on the computer I could see that the menus were being traversed correctly so I concluded that the cpu was likely fine as its clearly executing the code. I felt I could also conclude the ROM was probably fine as that is where the code came from. This left the RAM and the video circuitry (or the TV itself) as possible culprits. If the RAM is also being used by the code how can I not also say the RAM is fine? Well, the RAM is divided up into ranges of addresses, known as a memory map, part is used for code but another part is used as the video RAM or framebuffer. It's possible some memory cells in this section are damaged or not wired up correctly.
+</p>
+
+<p>
+How can I narrow down the problem? I can use something called a logic analyser which uses probes to record the activity in digital circuits. If this computer was a multi-gigahertz machine, a sufficient logic analyser would cost potentially millions of dollars but as this machine is only 4 megahertz I can use a cheap one off amazon.
+</p>
+
+<p>
+Where to start, well in debugging, you should start at the symptom of the problem and work your way upstream towards the issue. If I had another analogue TV I would have swapped it out to verify that the TV was fine but I didn't so I had to start at the video circuit.
+</p>
+
+<p>
+I inspected the circuit diagram included in the <a href="https://www.sunrise-ev.com/photos/1802/vip2kc-manual.pdf">manual</a>, found the chip that generated the video signal and attached probes to the pins that controlled it:
+</p>
+
+<img src="content/images/probes.jpg" alt="logic analyser probes attached to rca 1820 video circuit"  width="500px" />
+
+<p>
+I recorded these signals in the program pulseview:
+</p>
+
+<img src="content/images/logic_analyser_output.jpg" alt="logic analyser output"  width="500px" />
+
+<p>
+The chip is generating a PAL video signal. This is the video standard used here in Europe, for black and white its fairly similar to the US NTSC standard. The signal VSYNC is marking the beginning of a new image, the signal BLANK a new line in that image and QH is the luminosity or intensity of the electron beam.
+</p>
+
+<p>
+In case you don't know how old TVs work, they have an electron beam that sweeps across a phosphor coated surface, to draw an image you pulse the strength of the beam as it moves to illuminate the phosphor. If you want to illuminate a specific part, what we would call a pixel, you have to time the pulse (controlled by QH) with the beams location which you can determine with the VSYNC and BLANK signals.
+</p>
+
+<p>
+Knowing this I wrote a script in Python to parse the output of the logic analyser, simulated a PAL display and rendered what was being output:
+</p>
+
+<img src="content/images/python_crt_simulation.jpg" alt="image rendered from logic analyser recording"  width="500px" />
+
+<p>
+Oh no, it was the same. At least I knew the tv wasn't at fault. However, this is where I stopped. My logic analyser only has 8 probes and to go deeper I needed more. Some day I'll get a better logic analyser and continue my debugging.
+</p>
