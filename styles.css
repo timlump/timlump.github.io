@@ -83,6 +83,14 @@ body {
         margin:auto;
     }
 
+    .code {
+        font-family: monospace;
+        color: white;
+        border-color: orange;
+        border-style: solid;
+        padding-left: 10px;
+    }
+
     p, li {
         font-family: monospace;
         font-size: 15px;

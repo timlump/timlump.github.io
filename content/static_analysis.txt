@@ -1,0 +1,63 @@
+<h2><a href="/?article=static_analysis.txt">The trouble with static analysis</a></h2>
+
+<p>
+I briefly mentioned in my post on <a href="/?article=dpmi.txt">DOS extenders</a> that I was building my own tools to help understand the inner workings of an old DOS game. Why am I doing this? Well, I have tools that run on modern operating systems that will allow me to inspect the game's assembly code statically i.e. when its not running but they only show me half the picture. I need something that can watch the code as it executes which means I need a tool that can run in DOS in order to be able to do so but I haven't been able to find anything good enough.
+</p>
+
+<p>
+To illustrate why, lets think how a static analysis tool might work.
+First, it opens a file, identifies the executable format and parses it to determine where the code starts.
+Next, it starts scanning through the code identifying instructions as it goes. This can be done one of two ways:
+</p>
+
+<p>
+1) By scanning the binary linearly from beginning to end, just decoding instructions one by one. However, code and data are interleaved and you can't really tell the difference, meaning data will probably be decoded into gibberish instructions instead of say a helpful string of text that might have aided in your investigation. This can also be easily fooled by code that isn't aligned in memory how you would expect.
+</p>
+
+<p>
+What do I mean when I say code isn't aligned? Well, on some CPU architectures, instructions are a fixed length, known as the word size. Instructions on a CPU with a 32-bit word size would be 4 bytes long. Memory though is usually byte addressable regardless of word size. A hypothetical 4 byte instruction 0xAABBCCDD would be stored in memory like this:
+</p>
+
+<img src="content/images/in_memory.png" alt="how a 32 bit value would be stored in little endian" width="200px"/>
+
+<p>
+While you could access individual bytes, a 32-bit word cpu would retrieve all four bytes starting at address 0, execute the instruction and then retrieve the next four bytes starting at address 4, followed by 8, then 12 and so on until a jump instruction tells it to look elsewhere or the computer is turned off.
+</p>
+
+<p>
+Quick aside: the order of the bytes might look confusing. Most CPUs these days use <i>little-endian</i> format where the smallest part of the number goes in the first address. The name comes from Gulliver's travels where two factions (the big endians and the little endians) fight over which part of the egg one should start eating from.
+</p>
+
+<p>
+If the instruction started at address 1 however, it would be <i>unaligned</i> and the CPU may fail to correctly retrieve the instruction:
+</p>
+
+<img src="content/images/out_of_alignment.png" alt="memory unaligned on a word boundary" width="200px"/>
+
+<p>
+X86 cpus do not have a word size though, they use a variable length format where instructions can be anywhere from 1 to 15 bytes long and despite being a little endian cpu, instructions are stored in a big-endian format - it would be impossible to decode otherwise as you need to decode the instruction as you read in the bytes to know how long they are and where the next instruction would be.
+</p>
+
+<p>
+This makes it very difficult to accurately decode instructions with static analysis and creates many opportunities for the software creator to obfuscate the code to make it harder to read. They could interleave instructions in streams of bytes to confuse the debugger. Are those 15 bytes one instruction or 15? Valid instructions could be hidden <b>within</b> valid instructions and the only way to know would be to start the decoding from somewhere in the middle of the larger one!
+</p>
+
+<p>
+2) By scanning the binary non-linearly, following any instructions that jump to other memory locations. This is probably the better approach but if the memory locations need to be calculated at runtime, they will hit dead ends.
+</p>
+
+<p>
+An example of such a dead end:
+</p>
+
+<p class="code">
+call dword [0x12345] <br/>
+</p>
+
+<p>
+This calls a subroutine located at memory address <b>0x12345</b> which may point to nothing until the program actually runs and another section of code puts something at that address.
+</p>
+
+<p>
+In short, there are many ways both deliberate and inadvertent to make static code difficult or near impossible to understand. However, if the code is running you can see the missing runtime addresses after they've been calculated and follow the CPU into those instructions in the middle of other instructions. Basically code is only really alive when its executing.
+</p>

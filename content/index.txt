@@ -1,3 +1,4 @@
+static_analysis.txt
 rca1802.txt
 dpmi.txt
 chorded_keyboard.txt
