@@ -91,6 +91,19 @@ body {
         padding-left: 10px;
     }
 
+    .note {
+        font-family: monospace;
+        color: black;
+        background-color: orange;
+        border-style: solid;
+        padding-left: 10px;
+    }
+
+    audio {
+        display: block;
+        margin:auto;
+    }
+
     p, li {
         font-family: monospace;
         font-size: 15px;

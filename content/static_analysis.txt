@@ -24,7 +24,7 @@ What do I mean when I say code isn't aligned? Well, on some CPU architectures, i
 While you could access individual bytes, a 32-bit word cpu would retrieve all four bytes starting at address 0, execute the instruction and then retrieve the next four bytes starting at address 4, followed by 8, then 12 and so on until a jump instruction tells it to look elsewhere or the computer is turned off.
 </p>
 
-<p>
+<p class="note">
 Quick aside: the order of the bytes might look confusing. Most CPUs these days use <i>little-endian</i> format where the smallest part of the number goes in the first address. The name comes from Gulliver's travels where two factions (the big endians and the little endians) fight over which part of the egg one should start eating from.
 </p>
 

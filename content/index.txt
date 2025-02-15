@@ -1,3 +1,4 @@
+digital_necromancy.txt
 static_analysis.txt
 rca1802.txt
 dpmi.txt

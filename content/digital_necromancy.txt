@@ -1,0 +1,99 @@
+<h2><a href="/?article=digital_necromancy.txt">Digital Necromancy</a></h2>
+
+<p>
+Have you ever heard of Dr Dobb's Journal of Computer Calisthenics and Orthodontia?
+<br/>
+No? Well, it was a very significant publication from the early days of the personal computer, first published in January 1976.
+</p>
+
+<p>
+Its articles covered a wide range of topics from discussions of new fangled programming languages like C to interesting quality of life improvements for your personal computer which in the early issues would likely be some sort of Altair 8800 clone.
+</p>
+
+<p>
+I happen to have two volumes (3 and 5) in my collection and while perusing volume three, issue number 28, I came across an article in the latter category, written by Phil Mork and its title caught my eye - VOCAL MEMORY DUMP.
+</p>
+
+<p>
+Vocal...that must mean voice...on a 1978 personal computer? Indeed it was. Phil Mork had created a crude voice synthesizer, <b>sampled from his own voice,</b> ostensibly as a debugging tool that reads out the contents of a range of memory addresses, in octal.
+</p>
+
+<p class="note">
+Quick aside: Octal is a base-8 (you count 0-7) number system which was a popular shorthand for binary values at that time. Hexadecimal (0-F) has superseded it today as one hex number can represent 4 bits rather than 3 and therefore much more cleanly maps to 8-bit bytes which were still a relatively new idea in the 70s.
+</p>
+
+<p>
+It has been nearly 50 years since the article was written and that means there is a strong chance that nobody has heard those "low-fi" 1-bit voice samples in possibly many decades. I want to.
+</p>
+
+<p>
+The first hurdle is getting the code onto a computer. Nowadays, you'd just fork a github repo and away you go but that was not an option then. You had two choices 1) you could ask the author to send you the code on paper tape (which I doubt he'd do now) or 2) you could tediously type the printed code in yourself.
+</p>
+
+<p>
+I don't really want to type several pages of Intel 8080 assembly in by hand but I can do a few things to simplify this. I only care about the voice samples although these make up the majority of the code listing but they are only composed of repeated sequences of octal values which I could probably pretty trivially perform optical character recognition on to type in automatically.
+</p>
+
+<p>
+I didn't want to use something off the shelf for the OCR, I'm doing this as a learning exercise, why should I take shortcuts.
+</p>
+
+<p>
+So I wrote a very rough OCR script using OpenCV in Python. This script loads an image of the sample I want to hear alongside a few labelled images of numbers 0 to 7 extracted from the article.
+These images are all converted to greyscale, thresholded to convert them to a binary black and white image and then converted to a distance image so I can do chamfer matching. I slide a window across the image, comparing my sample characters to the window looking for a match, outputting anything with sufficient accuracy to a text file. It looks something like this:
+</p>
+
+<img src="content/images/sliding_window_example.gif" alt="animated gif showing the sliding window going over text" width="500px"/>
+
+<p>
+I don't get perfect results when applying this technique to the article. The image isn't perfectly aligned, text towards the right is slightly curved as it reaches the spine of the book and it seems to regularly confuse some numbers (6 in particular regularly gets confused with 4) but it's probably good enough to proceed with. There will be distortion in the final output but I've spent considerably longer working on this than it would have taken me to just type it in, so lets move on. I'll be using the sample listed as "four" in the following steps.
+</p>
+
+<p class="note">
+Note: I could have also used some sort of convolutional neural network for classifying the character images. Making the network would have been easy enough using pytorch but I would also need to create a training dataset and that could be a difficult task. I recommend you look up the concept known as the curse of dimensionality but in short it means you often need an awful lot of data to train a neural network.
+</p>
+
+<p>
+Next step is turning this sample into audio.
+</p>
+
+<p>
+It's actually surprisingly easy to turn samples into audio using the python library scipy. I convert each octal value i've recorded into three 1-bit samples and pass them to a function like this:
+</p>
+
+<p class="code">
+write("output.wav", rate, np.array(samples).astype(np.float32))
+</p>
+
+<p>
+The sampling frequency isn't directly mentioned in the article but conveniently he mentions talking with Jim Anderson who in the very next issue has a detailed article on speech called Data-Boy™ Speech Processor and a frequency of 8000 Hz is mentioned, so lets use that.
+</p>
+
+<p>
+What comes out at this point is fairly unintelligible but that is not unexpected. The article says you need to apply a low pass filter to make it coherent which I can easily do in a tool like Audacity but what settings do I use? Well, a circuit like this was needed to add an audio output to the author's machine:
+</p>
+
+<img src="content/images/output_circuit_diagram_rough.png" alt="diagram of an RC low pass filter" width="300px"/>
+
+<p>
+That is a text book example of an RC passive low pass filter, the cutoff frequency is defined by a simple equation:
+</p>
+
+<p class="code">
+fc = 1/(2*pi*R*C)
+</p>
+<p>
+If we just pop in the values from the diagram we get 1591.5 Hz, which is what I applied to the audio below:
+</p>
+
+<audio controls src="content/audio/four.wav"></audio>
+
+<p>
+I think that sort of sounds like the word four, to rule out any significant issue with the OCR approach I guess we need to hand type in the sample after all and create a clip from that too:
+</p>
+
+<audio controls src="content/audio/four_typed.wav"></audio>
+
+<p>
+That sounds a bit better...I think. I'm not exactly sure what I expected from 1-bit voice to be honest so it's hard to tell if it's correct. I guess for another project I'll need to actually create the audio circuit and run the code on one of my Intel 8080 machines.
+</p>
