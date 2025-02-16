@@ -46,7 +46,7 @@ These images are all converted to greyscale, thresholded to convert them to a bi
 <img src="content/images/sliding_window_example.gif" alt="animated gif showing the sliding window going over text" width="500px"/>
 
 <p>
-I don't get perfect results when applying this technique to the article. The image isn't perfectly aligned, text towards the right is slightly curved as it reaches the spine of the book and it seems to regularly confuse some numbers (6 in particular regularly gets confused with 4) but it's probably good enough to proceed with. There will be distortion in the final output but I've spent considerably longer working on this than it would have taken me to just type it in, so lets move on. I'll be using the sample listed as "four" in the following steps.
+I don't get perfect results when applying this technique to the article. The image isn't perfectly aligned, some of the text is slightly curved as it reaches the spine of the book and it seems to regularly confuse some numbers (6 in particular regularly gets confused with 4) but it's probably good enough to proceed with. There will be distortion in the final output but I've spent considerably longer working on this than it would have taken me to just type it in, so lets move on. I'll be using the sample listed as "four" in the following steps.
 </p>
 
 <p class="note">
