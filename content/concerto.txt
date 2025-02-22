@@ -1,0 +1,107 @@
+<h2><a href="/?article=concerto.txt">Making something dumb</a></h2>
+
+<p>
+In my collection I have one of these:
+</p>
+
+<img src="content/images/concerto_off.jpg" alt="the compaq concerto turned off" width="500px"/>
+
+<p>
+It's a rather funny looking laptop with a detachable keyboard and believe it or not it has a touch screen making it a very early example of a 2 in 1 computer. It is called the Compaq Concerto and its from all the way back in 1993. You might have also seen it used as a prop in the film Die Hard with a Vengence as the count down screen for the villain's MacGuffins.
+</p>
+
+<p>
+It was also non-functional when I got it or at least the seller thought so. It turns out it was just the power supply that was toast, hooking it up to my bench power supply made it light up although it couldn't find an operating system.
+</p>
+
+<p>
+The ancient (and rather loud) hard drive was either blank or dead so I replaced it with a compact flash card I had lying around and proceeded to attempt to install some sort of OS. I also clipped out the backup battery inside that was starting to look suspect and most likely didn't hold a charge:
+</p>
+
+<img src="content/images/concerto_cf.jpg" alt="concerto cf" width="500px"/>
+
+<p>
+Installing an operating system proved harder than I expected though. It was surprisingly picky when I tried various images and some old discussions online didn't suggest it would be easy, especially starting from an entirely blank system. 
+</p>
+
+<p>
+However, I had at the time gotten into the rather niche hobby of boot sector programming after buying Oscar Toledo's books: <i>Programming Boot Sector Games</i> and the sequel <i>More Boot Sector Games</i>.
+</p>
+
+<p class="note">
+Aside: The boot sector is the first 512 bytes on the boot device which are automatically loaded and executed by the BIOS (basic input output system). It is generally meant for setting up the environment and loading any other sectors necessary to start the operating system. The last two bytes are always 0xAA55 to identify it which means you have only 510 usable bytes to play with.
+</p>
+
+<p>
+So I wrote a quick x86 assembly program to print out the typical "Hello,world!" that usually is the first thing a programmer runs in a new environment, padded it out to make 510 bytes, added the final 0xAA55 to make it 512 and flashed it directly to the CF card I had replaced the hard drive with and it worked!
+</p>
+
+<img src="content/images/concerto_hello_world.jpg" alt="concerto screen showing hello world" width="500px"/>
+
+<p>
+We were in business, this meant I could actually get things to run on the machine. I tried some of the games in Oscar's book like his DOOM clone and space invaders and these worked flawlessly:
+</p>
+
+<img src="content/images/concerto_fps.jpg" alt="A 3d maze game on the concerto screen" width="500px"/>
+<br/>
+<img src="content/images/concerto_si.jpg" alt="A space invaders clone on the concerto screen" width="500px"/>
+
+<p>
+I decided at this point that I could actually turn this device into something useful - a dumb terminal for my other retro machines.
+</p>
+
+<p class="note">
+Aside: A dumb terminal is a now defunct computer peripheral that outwardly looks like an old personal computer but in fact is just a screen and keyboard connected over serial to a bigger machine. A hybrid between this and a personal computer did exist, known as a smart terminal which used a microprocessor to perform some tasks to reduce the load on the host computer.
+</p>
+
+<p>
+I had been up until this point interacting with my retro computers through a usb to serial cable on my beefy modern machine and something about this didn't feel right. I wasn't being fully immersed in the old school environment. I play with these machines to get a better feel for computer history, so maybe turning the Concerto into a dumb terminal would make it more immersive.
+</p>
+
+<p>
+Writing a serial terminal program was going to be quite tedious if I did it the same way I had written the hello world program though. I had to dismantle the machine, tear out the CF card, flash it with my computer, reinsert it and reassemble the machine for every iteration. Thankfully, I was able to use another innovation of Oscar's: bootOS, a bare bones operating system that fits in a boot sector and included an extremely simple hex editor through which I could enter the machine code directly:
+</p>
+
+<img src="content/images/concerto_bootos.jpg" alt="bootOS running on the concerto with hexadecimal being entered" width="500px"/>
+
+<p>
+After writing the terminal program and painstakingly typing in the hex I went to test it by connecting it to my computer and ... it didn't work. I pretty quickly realised the problem though, most serial cables these days just use three wires - transmit, receive and ground which is what my cable used. A typical DB-9 serial port has many more pins though for all sorts of handshaking like DTR (data terminal ready), DCD (data carrier detect), DSR (data set ready), RTS (request to send) and CTS (clear to send) and it turns out the Concerto's serial communication chip actually cared about these.
+</p>
+
+<p>
+The fix was simple enough though, I just had to solder together the following pins on my cable: RTS-CTS and DSR-DCD-DTR. This meant when the Concerto sent a handshake it effectively shook its own hand and then happily proceeded to send and receive data. The serial terminal was working, I had my dumb terminal.
+</p>
+
+<p>
+I then proceeded to go even further. I measured out the dimensions of the long dead Concerto battery using another weird computer I have, the HP sprout, which has an awesome overhead projector and 3d scanner system (I'll have to do an article on that machine at some point). I could have also used my digital calipers but this was more fun.
+</p>
+
+<p>
+I designed and 3d printed some cool sidecar modules for my Intel 8080 and MOS 6502 machines that could lock into the otherwise vacant battery bay. Here is the 6502 one, with the Concerto charging pins connected to a custom board I assembled to step down the voltage and also convert the 5 volt serial standard of the 6502 machine to the RS-232 standard expected by the Concerto:
+</p>
+
+<p class="note">
+Aside: A sidecar is a secondary computer connected to the primary computer you are using to expand its functionality. You can find examples online of people adding raspberry pis to old pocket computers to give wifi functionality etc.
+</p>
+
+<img src="content/images/6502_sidecar.jpg" alt="6502 machine connected to the concerto power pins" width="500px"/>
+<br/>
+<img src="content/images/6502_sidecar_flush.jpg" alt="6502 sidecard module flush with the back of the concerto" width="500px"/>
+
+<p>
+The Intel 8080 sidecar though was much more impressive. Instead of soldering wires to the battery bay pins, I made a fully enclosed module that mated directly to the pins:
+</p>
+
+<img src="content/images/8080_sidecar_contacts.jpg" alt="a closeup of the 8080 sidecar battery bay contacts" width="300px"/>
+
+<p>
+and due to the much greater heat of the Intel 8080 compared to the 6502 I also added a fan which ended up looking pretty damn cool thanks to the red LEDs:
+</p>
+
+<img src="content/images/8080_sidecar_fan.jpg" alt="a closeup of the 8080 sidecar inserted into the back of the concerto" width="300px"/>
+
+<p>
+At some point I'll probably write a full article on the design of this sidecar as I actually put a lot of effort into its design and it has some cool features. Anyway I had succeeded in my mission to make a dumb terminal out of the Concerto and was able to have a more authentic experience interacting with some of my retro computers:
+</p>
+
+<img src="content/images/6502_terminal.jpg" alt="6502 output being shown on the concerto screen" width="500px"/>
