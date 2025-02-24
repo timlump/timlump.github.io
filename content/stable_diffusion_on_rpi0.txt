@@ -18,7 +18,7 @@ Thankfully <a href="https://github.com/vitoplantamura/OnnxStream">OnnxStream</a>
 At first I tried to compile OnnxStream and its dependencies on the pi itself but even this took a very long time so I had to cross compile it on my pc. To further speed up results - I only went for 3 steps and opted to use stable diffusion 1.5 instead of stable diffusion XL. I kicked it off with the now ubiquitous prompt of "an astronaut riding a horse on mars" and many hours later returned to see the wonderful picture below:
 </p>
 
-<img src="content/images/astronaut.png" alt="an astronaut riding a horse on mars"/>
+<img src="content/images/rpi/astronaut.png" alt="an astronaut riding a horse on mars"/>
 
 <p>
 While my experiment was successful and in theory I could generate a few pictures a day, meaning my frame would show more pictures than the average picture frame :) I decided not to deploy it for one simple reason - due to the low RAM, the only alternative is to swap memory in and out of disc rapidly for hours on end and since the pi uses a microsd card, I could envisage it reaching its write limit very quickly and prematurely failing.
