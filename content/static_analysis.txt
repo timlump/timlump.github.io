@@ -18,7 +18,7 @@ Next, it starts scanning through the code identifying instructions as it goes. T
 What do I mean when I say code isn't aligned? Well, on some CPU architectures, instructions are a fixed length, known as the word size. Instructions on a CPU with a 32-bit word size would be 4 bytes long. Memory though is usually byte addressable regardless of word size. A hypothetical 4 byte instruction 0xAABBCCDD would be stored in memory like this:
 </p>
 
-<img src="content/images/in_memory.png" alt="how a 32 bit value would be stored in little endian" width="200px"/>
+<img src="content/images/static_analysis/in_memory.png" alt="how a 32 bit value would be stored in little endian" width="200px"/>
 
 <p>
 While you could access individual bytes, a 32-bit word cpu would retrieve all four bytes starting at address 0, execute the instruction and then retrieve the next four bytes starting at address 4, followed by 8, then 12 and so on until a jump instruction tells it to look elsewhere or the computer is turned off.
@@ -32,7 +32,7 @@ Quick aside: the order of the bytes might look confusing. Most CPUs these days u
 If the instruction started at address 1 however, it would be <i>unaligned</i> and the CPU may fail to correctly retrieve the instruction:
 </p>
 
-<img src="content/images/out_of_alignment.png" alt="memory unaligned on a word boundary" width="200px"/>
+<img src="content/images/static_analysis/out_of_alignment.png" alt="memory unaligned on a word boundary" width="200px"/>
 
 <p>
 X86 cpus do not have a word size though, they use a variable length format where instructions can be anywhere from 1 to 15 bytes long and despite being a little endian cpu, instructions are stored in a big-endian format - it would be impossible to decode otherwise as you need to decode the instruction as you read in the bytes to know how long they are and where the next instruction would be.
