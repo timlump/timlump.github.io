@@ -16,12 +16,12 @@ I didn't think I would ever get to try one until Febuary 2024 when I found one! 
 <p>
 A few days later it arrived, in perfect condition:
 </p>
-<img src="content/images/novint_falcon.jpg" alt="unboxing the novint falcon" width="500px"/>
+<img src="content/images/novint/novint_falcon.jpg" alt="unboxing the novint falcon" width="500px"/>
 
 <p>
 However not all was well. My computer runs on windows 11 and when the Novint came out people would probably have used XP or Vista and when I tried to install the bundled drivers, my computer was not happy. It forced me to disable some security features like core isolation and in general pestered me about the driver although it did work. I was able to install and run the awesome texture demo that I believe I saw back in 2007. Here it is running below:
 </p>
-<img src="content/images/novint_demo.jpg" alt="playing a tech demo with the falcon" width="500px"/>
+<img src="content/images/novint/novint_demo.jpg" alt="playing a tech demo with the falcon" width="500px"/>
 
 <p>
 Having finally gotten to play the demo I can confirm that it really does feel like you are touching the objects on the screen. The demo lets you change the texture of the ball to substances like sandpaper, honey, ice etc. and it genuinely feels correct. You interact by grabbing the little end effector visible in the image above and the three arms move with quite a bit of force to simulate the resistance and texture you would expect.
@@ -42,7 +42,7 @@ I started to wonder if perhaps any Novint functionality had been in fact removed
 <p>
 Guess what, it was! It was looking for some dlls in the folder: c:\program files (x86)\novint\falcon\hdal, the folder existed but the dlls didn't. This was the break I needed in the case though. I looked around for HDAL, discovered it was the SDK for the device and I managed to find a later version which did have these dlls. I copied them into the folder and when I next started half-life 2, the Novint lit up and it worked!
 </p>
-<img src="content/images/novint_hl2.jpg" alt="playing half-life 2 with the falcon" width="500px"/>
+<img src="content/images/novint/novint_hl2.jpg" alt="playing half-life 2 with the falcon" width="500px"/>
 
 <p>
 Playing half-life 2 this way is quite the experience. Apparently at max power (which you can adjust in a new settings menu in-game), the Falcon can give 10 newtons of force which is substantial so using the crowbar can pretty quickly start to hurt and shooting anything full auto has you struggling to hit anything smaller than a barn. It's objectively a bad way to play the game but it is hilarious and unique. <i>If you have the means, I highly recommend picking one up.</i>

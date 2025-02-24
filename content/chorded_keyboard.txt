@@ -24,29 +24,29 @@ As I am fascinated by unusual devices like this. I had to try out the concept. S
 I didn't want to make an exact copy of the design as not only did I not have the dimensions but it didn't look that ergonomically comfortable so I made my own design. I measured the dimensions of the pico and key switches with my digital calipers, took some rough measurements of my hand to get a feeling for what would be comfortable and began laying it out using Blender:
 </p>
 
-<img src="content/images/keyboard_mockup_inside.jpg" alt="image of hand over interior of keyboard" width="500px"/>
+<img src="content/images/chord/keyboard_mockup_inside.jpg" alt="image of hand over interior of keyboard" width="500px"/>
 
 <p>
 A lot of the inspiration for the outside of the case came from looking at the mouse I was using at that very moment:
 </p>
-<img src="content/images/keyboard_mockup_full.jpg" alt="image of hand over full keyboard" width="500px"/>
+<img src="content/images/chord/keyboard_mockup_full.jpg" alt="image of hand over full keyboard" width="500px"/>
 
 <p>
 Once I was happy with the design, I began printing with an old 3d printer I got back in 2016. It had been stored in an attic for the previous 3 years and was worse for wear but it was able to print the base plate with only minimal warping. I hot glued in my mechanical key switches adorned with key caps from an old keyboard and soldered everything to a header which I attached to the raspberry pi pico:
 </p>
-<img src="content/images/keyboard_inside.jpg" alt="the base plate wired up" width="500px"/>
+<img src="content/images/chord/keyboard_inside.jpg" alt="the base plate wired up" width="500px"/>
 <p>
 I installed a circuit python boot loader onto the pico, added Adafruit's HID library (to make the device show up as a normal keyboard) and OLED driver to control a little screen I added to show the status of the device and then started programming. I wrote a simple but powerful GUI library to draw to the screen with menus, status bars, widgets for showing button states and so on. I implemented the letter combinations of the MicroWriter but also some of my own for navigating a graphical operating system which wouldn't have been a consideration for the original MicroWriter.
 </p>
-<img src="content/images/keyboard_screen.jpg" alt="the oled screen of the device" width="500px"/>
+<img src="content/images/chord/keyboard_screen.jpg" alt="the oled screen of the device" width="500px"/>
 <p>
 At this point, everything was working so I went to print the upper case for the device and disaster struck. My 3d printer got jammed at some point in the print and many hours later I returned to see a giant ball of molten plastic surrounding the extruder. The printer was ruined and I had no case for my chorded keyboard. However, I didn't let this stop me. I grabbed some foam boards lying nearby and tried my best with a knife and a copius application of hot glue to approximate the design I had mocked up:
 </p>
-<img src="content/images/keyboard_rough.jpg" alt="the rough foam case" width="500px"/>
+<img src="content/images/chord/keyboard_rough.jpg" alt="the rough foam case" width="500px"/>
 <p>
 I then covered it in some painters tape that I hastily tried to paint black with a marker to cover up the rough edges, and voilà, I was done.
 </p>
-<img src="content/images/keyboard_final.jpg" alt="the final device" width="500px"/>
+<img src="content/images/chord/keyboard_final.jpg" alt="the final device" width="500px"/>
 <p>
 I used this keyboard for a couple of days and it worked, I even plugged it into my Xbox Series X and was able to enter details and navigate menus. The key combinations were intuitive enough to use but it just wasn't very fast. In the end I am happy I didn't win the auction as the real value was building it rather than using it.
 </p>
