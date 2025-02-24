@@ -43,7 +43,7 @@ So I wrote a very rough OCR script using OpenCV in Python. This script loads an 
 These images are all converted to greyscale, thresholded to convert them to a binary black and white image and then converted to a distance image so I can do chamfer matching. I slide a window across the image, comparing my sample characters to the window looking for a match, outputting anything with sufficient accuracy to a text file. It looks something like this:
 </p>
 
-<img src="content/images/sliding_window_example.gif" alt="animated gif showing the sliding window going over text" width="500px"/>
+<img src="content/images/necromancy/sliding_window_example.gif" alt="animated gif showing the sliding window going over text" width="500px"/>
 
 <p>
 I don't get perfect results when applying this technique to the article. The image isn't perfectly aligned, some of the text is slightly curved as it reaches the spine of the book and it seems to regularly confuse some numbers (6 in particular regularly gets confused with 4) but it's probably good enough to proceed with. There will be distortion in the final output but I've spent considerably longer working on this than it would have taken me to just type it in, so lets move on. I'll be using the sample listed as "four" in the following steps.
@@ -73,7 +73,7 @@ The sampling frequency isn't directly mentioned in the article but conveniently 
 What comes out at this point is fairly unintelligible but that is not unexpected. The article says you need to apply a low pass filter to make it coherent which I can easily do in a tool like Audacity but what settings do I use? Well, a circuit like this was needed to add an audio output to the author's machine:
 </p>
 
-<img src="content/images/output_circuit_diagram_rough.png" alt="diagram of an RC low pass filter" width="300px"/>
+<img src="content/images/necromancy/output_circuit_diagram_rough.png" alt="diagram of an RC low pass filter" width="300px"/>
 
 <p>
 That is a text book example of an RC passive low pass filter, the cutoff frequency is defined by a simple equation:
@@ -86,13 +86,13 @@ fc = 1/(2*pi*R*C)
 If we just pop in the values from the diagram we get 1591.5 Hz, which is what I applied to the audio below:
 </p>
 
-<audio controls src="content/audio/four.wav"></audio>
+<audio controls src="content/audio/necromancy/four.wav"></audio>
 
 <p>
 I think that sort of sounds like the word four, to rule out any significant issue with the OCR approach I guess we need to hand type in the sample after all and create a clip from that too:
 </p>
 
-<audio controls src="content/audio/four_typed.wav"></audio>
+<audio controls src="content/audio/necromancy/four_typed.wav"></audio>
 
 <p>
 That sounds a bit better...I think. I'm not exactly sure what I expected from 1-bit voice to be honest so it's hard to tell if it's correct. I guess for another project I'll need to actually create the audio circuit and run the code on one of my Intel 8080 machines.
