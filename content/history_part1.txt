@@ -1,0 +1,53 @@
+<h2><a href="/?article=history_part1.txt">The Computer Part 1 : Primordial Soup</a></h2>
+
+<p>
+Computers have become a critical and commonplace part of our lives. You are reading this post on one, carry one in your pocket, use one in work, in bed and even on the toilet. However, I imagine many don't know the origins of the computer. If I asked you: who flew the first airplane or made the first moveable type printing press, you'd probably have the answer. If I asked you who made the first computer though, would you have the answer?
+</p>
+
+<p>
+I'm not quite sure why such an important device isn't given more time in history class as it has reshaped our lives in ways that few other inventions have (if ever) before. So let me tell you the story of the computer, I think you'll find it interesting.
+</p>
+
+<p>
+Let's begin at the beginning...but where is that? It's actually harder to pin down than you'd expect and largely depends on what you mean when you say a computer, which is actually a term older than the device. If you look up the first computer you might see the ENIAC in 1945, perhaps the Harvard Mark I in 1944 or maybe even the obscure Z3 in 1941 but you'll often see them couched in qualifiers like first - "electronic", "electro-mechanical, "programmable", "general purpose" and so on.
+</p>
+
+<p>
+If you peel all these away, the first computer changes a <b>lot</b>. It wouldn't be from the 1940s but rather over 2000 years before! It would be a device, which miraculously still exists (at least partially) called the Antikythera mechanism, found in the early 20th century in an ancient Greek shipwreck. You might have recently seen it in the latest Indiana Jones film as the titular "dial of destiny".
+</p>
+
+<p>
+Contrary to the film version, the real device is an example of an orrery - a model of the solar system which could be used to predict things like eclipses. It is mechanical and doesn't run code but it is a computer - an <b>analogue</b> computer.
+</p>
+
+<p>
+What do I mean by analogue? You might think of analogue versus digital music when you hear the word and that is a good place to start. Digital music you most likely know is encoded as binary data, zeros and ones while analogue music stores the continuous sound values instead. In the case of a vinyl record, the walls of the grooves literally resemble the sound waves, they are <i>analogous</i> - similar or equivalent to them.
+</p>
+
+<img src="content/images/history/analogue_v_digital.jpg" alt="a drawing of a vinyl groove with a stylus going through it and a rough example of digital values being sampled" width="600px"/>
+
+<p>
+This is how an analogue computer works, in the case of the Antikythera mechanism it allows you to predict an eclipse by having gearing that moves in a way analogous to the real astronomical bodies.
+</p>
+
+<img src="content/images/history/orrery.jpg" alt="a rough sketch of an orrery" width="300px" />
+
+<p>
+Computers like this came first  because they were more intuitive to build. It's reasonably clear how you would be able to predict solar events by making a miniature approximation of the solar system and then watching what it did when you turned a crank. How would you do this with a digital machine? This would require some serious advances in mathematics to happen first, I'm not even sure if they had the concept of negative numbers when the Antikythera mechanism was made. They certainly didn't have calculus (that wouldn't appear for another 1600 years).
+</p>
+
+<p>
+Ignoring the rather anomalous Antikythera mechanism, calculating machines or anything ressembling a computer really first appear in the 17th century, when the primordial ancestors of the digital computer, the first mechanical calculators start to show up. Devices like Blaise Pascal's Pascaline in 1642 or Leibniz's Stepped Reckoner in 1694 although manufacturing wasn't really precise enough to make machines like these robust and reliable enough, that would take until the 19th century.
+</p>
+
+<p>
+These weren't computers though. Really their operators were the computers. It was a human who followed the algorithms and kept track of the results, not the device. In fact, computer was a job title up until modern computers were invented.
+</p>
+
+<p>
+It would take a while for people to make a machine that could follow instructions and it wouldn't be a computer that did it first but rather a piece of textile equipment - the most famous being the Jacquard loom in 1804. This was a loom that was fed with a chain of punched cards to control it, allowing it to make complex textile patterns easily and repeatedly. It caught the attention of a man you might have heard of: Charles Babbage.
+</p>
+
+<p>
+We'll talk more about him and how he nearly invented the first digital computer in the next part.
+</p>
