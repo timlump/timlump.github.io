@@ -1,0 +1,145 @@
+<h2><a href="/?article=wireless_serial.txt">Retro WiFi</a></h2>
+
+<p>
+Do you know what a palmtop is? They were small form factor laptops that were about as big as a modern smart phone. You might recall seeing one in the film Terminator 2 Judgement Day, being used by a young John Connor to hack an ATM. That particular device was an Atari Portfolio, released in 1989, which is an early example and the first to be compatible with IBM PCs. I don't have one of these but I do have a better palmtop that was released two years later in 1991 - the HP-95LX:
+</p>
+
+<img src="content/images/wireless_serial/hp95.jpg" alt="hp95lx showing the file manager" width="500px" />
+
+<p>
+This machine unlike the Portfolio uses a proper version of DOS so loads of old programs will work on it and it's even still possible to make applications for it using modern tools like OpenWatcom. It has a nice crisp monochrome display although it doesn't have support for standard DOS graphics. You are limited to text mode unless the application uses the device's native low level graphics routines. I did play around with these and managed to draw a triangle on the screen:
+</p>
+
+<img src="content/images/wireless_serial/hp95_triangle.jpg" alt="hp95lx showing a triangle" width="500px" />
+
+<p>
+If you're interested in how I did this, here is the code:
+</p>
+
+<p class="code">
+#include &lt;stdio.h&gt;<br/>
+#include &lt;math.h&gt;<br/>
+<br/>
+
+void set_graphics_mode();<br/>
+#pragma aux set_graphics_mode = \<br/>
+"mov ax, 0x0020" \<br/>
+"int 0x5f"<br/>
+<br/>
+
+void set_alpha_mode();<br/>
+#pragma aux set_alpha_mode = \<br/>
+"mov ax, 0x0070" \<br/>
+"int 0x5f"<br/>
+<br/>
+
+void set_pen_pos(int x, int y);<br/>
+#pragma aux set_pen_pos = \<br/>
+"mov ah, 0" \<br/>
+"int 0x5f" \<br/>
+parm [cx][dx];<br/>
+<br/>
+
+void draw_line_to(int x, int y);<br/>
+#pragma aux draw_line_to = \<br/>
+"mov ah, 6" \<br/>
+"int 0x5f" \<br/>
+parm [cx][dx];<br/>
+<br/>
+
+int main(int argc, char* argv[]) {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;set_graphics_mode();<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;set_pen_pos(119,12);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;draw_line_to(170,115);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;draw_line_to(68,115);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;draw_line_to(119,12);<br/>
+    <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;set_alpha_mode();<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;return 0;<br/>
+}<br/>
+</p>
+
+<p class="note">
+Aside: The HP-95LX has a custom bios interrupt 0x5f which controls the graphics mode which I access through some inline assembly (using OpenWatcom syntax). The program is relatively simple, I put the device in graphics mode, move the cursor around and tell it to draw some lines and then restore the device to alphanumeric mode. If I didn't do that last step, you wouldn't see the "Press any key to continue..." prompt once the program finished.
+</p>
+
+<p>
+However, the reason I got this machine wasn't to write software for it but rather to use it as a portable terminal for modern and retro machines much like the Compaq Concerto I discussed <a href="/?article=concerto.txt">here</a>.
+</p>
+
+<p>
+ The serial port on the HP-95LX is mostly compatible with the RS-232 standard although using a lower -6 to 6 volt range, persumably for power consumption reasons. It doesn't use a standard port but rather a proprietary 4 pin connector and a cable didn't come with the device I bought.
+</p>
+
+<p>
+Looking around online I was able to find out that the 4 pin JST XH 2.0 standard was reasonably close to the port size so I was able to fashion a cable using it. I had a serial to USB cable handy that used the RS-232 voltages but through a 3.5mm audio jack so I made my cable connect to this:
+</p>
+
+<img src="content/images/wireless_serial/adapter.jpg" alt="a sketch of the hp 95lx connector connected to a 3.5mm RS-232 jack" width="500px" />
+
+<p>
+Using this cable I was able to transfer applications to the device and use it as a serial terminal.
+For example, below you can see me using it to connect to my raspberry pi based replica of the PDP-11 to play the famous text adventure colossal cave:
+</p>
+
+<img src="content/images/wireless_serial/colossal.jpg" alt="hp95lx showing a txt from the game colossal cave" width="500px" />
+
+<p>
+However, the cable was very short and I felt it would be more useful if the HP-95LX could be used more remotely. So I decided to build a wireless serial cable!
+</p>
+
+<p>
+To achieve this I purchased a small programmable microcontroller with WiFi, namely the ESP-8266 which only had the bare minimum of pins exposed but this did include the vital serial transmit and receive pins.
+My plan was to connect the HP-95LX to this via serial, transmit the serial communication over WiFi to another ESP-8266 which would be connected to another machine to complete the <b>wireless</b> serial connection. I also needed a MAX 3232 chip to take the RS-232 voltages from the HP and convert them to the 3.3 volt levels expected by the ESP.
+</p>
+
+<p>
+Programming the ESP-8266 was fairly straight forward, I setup the one that would be connected to the computer other than the HP-95LX as a hotspot and the other to automatically connect to it. I then made them forward anything they received over serial to the other device.
+</p>
+
+<p>
+Designing the adapter was a little more involved though. I first drew a rough circuit diagram, like so:
+</p>
+
+<img src="content/images/wireless_serial/rough_circuit_diagram.jpg" alt="a rough circuit diagram of the wireless serial adapter" width="500px"/>
+
+<p>
+I then sketched out how I imagined the various parts might look together:
+</p>
+
+<img src="content/images/wireless_serial/adapter_sketch.jpg" alt="rough sketch of adapter" width="500px"/>
+
+<p>
+I tried to match this as best I could with the real parts, trying all sorts of configurations to make it as compact as possible:
+</p>
+
+<img src="content/images/wireless_serial/parts_laid_out.jpg" alt="the parts for the adapter laid out" width="500px"/>
+
+<p>
+Once I found a layout I was happy with (one that would fit in the project box visible to the left), I soldered it together and tested it:
+</p>
+
+<img src="content/images/wireless_serial/adapter_bare.jpg" alt="the adapter being tested" width="500px"/>
+
+<p>
+I had to make some software tweaks but ultimately I was able to control my PDP-11 replica over the wireless serial connection. Here you can see the selection screen for the various operating systems it can run:
+</p>
+
+<img src="content/images/wireless_serial/controlling_pdp.jpg" alt="the pdp-11 operating system selection" width="500px"/>
+
+<p>
+The final thing to do was to fit it into the project box:
+</p>
+
+<img src="content/images/wireless_serial/adapter_box1.jpg" alt="the adapter in the project box" width="500px"/>
+
+<p>
+I cut a hole in the side for the 3.5mm connection and a hole in the top of the lid to press the power supply on/off switch:
+</p>
+
+<img src="content/images/wireless_serial/adapter_box2.jpg" alt="the adapter in the project box" width="500px"/>
+
+<p>
+and with that I was done.
+</p>
