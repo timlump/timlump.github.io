@@ -37,7 +37,7 @@ Computers like this came first  because they were more intuitive to build. It's 
 </p>
 
 <p>
-Ignoring the rather anomalous Antikythera mechanism, calculating machines or anything ressembling a computer really first appear in the 17th century, when the primordial ancestors of the digital computer, the first mechanical calculators start to show up. Devices like Blaise Pascal's Pascaline in 1642 or Leibniz's Stepped Reckoner in 1694 although manufacturing wasn't really precise enough to make machines like these robust and reliable enough, that would take until the 19th century.
+Ignoring the rather anomalous Antikythera mechanism, calculating machines or anything resembling a computer really first appear in the 17th century, when the primordial ancestors of the digital computer, the first mechanical calculators start to show up. Devices like Blaise Pascal's Pascaline in 1642 or Leibniz's Stepped Reckoner in 1694 although manufacturing wasn't really precise enough to make machines like these robust and reliable enough, that would take until the 19th century.
 </p>
 
 <p>
