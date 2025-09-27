@@ -68,6 +68,13 @@ body {
         padding:10px 0;
     }
 
+    h3 {
+        font-family: monospace;
+        font-size: 18px;
+        color: orange;
+        filter: blur(.4px);
+    }
+
     a {
         font-family: monospace;
         color: orange;
@@ -89,6 +96,7 @@ body {
         border-color: orange;
         border-style: solid;
         padding-left: 10px;
+        white-space: pre-wrap;
     }
 
     .note {
@@ -99,12 +107,24 @@ body {
         padding-left: 10px;
     }
 
+    .comment {
+        color:deepskyblue;
+    }
+
+    .variable {
+        color:greenyellow;
+    }
+
+    .directive {
+        color:red;
+    }
+
     audio {
         display: block;
         margin:auto;
     }
 
-    p, li {
+    p, ul {
         font-family: monospace;
         font-size: 15px;
         text-align: left;

@@ -16,48 +16,42 @@ This machine unlike the Portfolio uses a proper version of DOS so loads of old p
 If you're interested in how I did this, here is the code:
 </p>
 
-<p class="code">
-#include &lt;stdio.h&gt;<br/>
-#include &lt;math.h&gt;<br/>
-<br/>
+<p class="code">#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
 
-void set_graphics_mode();<br/>
-#pragma aux set_graphics_mode = \<br/>
-"mov ax, 0x0020" \<br/>
-"int 0x5f"<br/>
-<br/>
+void set_graphics_mode();
+#pragma aux set_graphics_mode = \
+"mov ax, 0x0020" \
+"int 0x5f"
 
-void set_alpha_mode();<br/>
-#pragma aux set_alpha_mode = \<br/>
-"mov ax, 0x0070" \<br/>
-"int 0x5f"<br/>
-<br/>
+void set_alpha_mode();
+#pragma aux set_alpha_mode = \
+"mov ax, 0x0070" \
+"int 0x5f"
 
-void set_pen_pos(int x, int y);<br/>
-#pragma aux set_pen_pos = \<br/>
-"mov ah, 0" \<br/>
-"int 0x5f" \<br/>
-parm [cx][dx];<br/>
-<br/>
+void set_pen_pos(int x, int y);
+#pragma aux set_pen_pos = \
+"mov ah, 0" \
+"int 0x5f" \
+parm [cx][dx];
 
-void draw_line_to(int x, int y);<br/>
-#pragma aux draw_line_to = \<br/>
-"mov ah, 6" \<br/>
-"int 0x5f" \<br/>
-parm [cx][dx];<br/>
-<br/>
+void draw_line_to(int x, int y);
+#pragma aux draw_line_to = \
+"mov ah, 6" \
+"int 0x5f" \
+parm [cx][dx];
 
-int main(int argc, char* argv[]) {<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;set_graphics_mode();<br/>
-<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;set_pen_pos(119,12);<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_line_to(170,115);<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_line_to(68,115);<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;draw_line_to(119,12);<br/>
-    <br/>
-&nbsp;&nbsp;&nbsp;&nbsp;set_alpha_mode();<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;return 0;<br/>
-}<br/>
+int main(int argc, char* argv[]) {
+    set_graphics_mode();
+
+    set_pen_pos(119,12);
+    draw_line_to(170,115);
+    draw_line_to(68,115);
+    draw_line_to(119,12);
+    
+    set_alpha_mode();
+    return 0;
+}
 </p>
 
 <p class="note">

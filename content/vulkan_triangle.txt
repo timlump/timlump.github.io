@@ -1,0 +1,622 @@
+<h2><a href="/?article=vulkan_triangle.txt">Hello, Triangle</a></h2>
+
+<p>
+They say a picture is worth a thousand words and I think the same is true in software, especially when being taught it.
+Asking someone to write code that just produces text output in the console just doesn't have the same magic as drawing an image onto the screen.
+Seeing colours and shapes appear is a powerful motivator and can inspire some amazing creativity too.
+It is a shame then, that the barrier to entry for computer graphics is perceived as being so high with either extremely complex low level APIs or massive game engines to learn.
+It can be overwhelming for someone starting out these days. 
+</p>
+
+<p>
+It was simpler when I was first learning graphics, the engines that are so popular now either didn't exist or were not as freely available.
+I don't recall anyone seriously suggesting starting their experimentation in the field with a game engine like they would today.
+OpenGL was what we were taught and due to its age, being first introduced in 1992 before complex programmable pipelines existed, it offered a surprisingly gentle introduction into graphics.
+You could use the old immediate mode, fixed function pipeline with glVertex, glColor etc along with hard coded light sources to get something functional very quickly and you could then gradually replace this older functionality as you learned it with the more modern equivalents.
+This was a great strength of OpenGL for learning graphics but it also was a weakness that meant the API was littered with long obsolete functions and modern functionality was increasingly more difficult to add.
+OpenGL is still supported however and I would wholeheartedly recommend that someone starting out, begin there. It's easy to learn and there are lots of great tutorials available.
+</p>
+
+<p>
+However, I know you are not going to listen to me because OpenGL has not been updated since 2017 and as a result you are probably going to learn Vulkan.
+Vulkan unfortunately lacks the beginner friendly on-ramp that OpenGL has. It has offloaded much of the setup that previously was performed internally by the gpu drivers to the programmer, allowing them much greater control and in theory better performance.
+Once all this setup is complete, the actual day to day experience is not that different from OpenGL but the setup itself is daunting and I believe scares off most who attempt it, either pushing them towards using game engines or just not doing graphics at all.
+This is sad.
+</p>
+
+<p>
+There are some great tutorials available for Vulkan but I think many assume the reader is already quite experienced in APIs like OpenGL and as a result are too difficult for people just starting out.
+When someone is learning a new language or platform for the first time, they tend to write a ubiquitous <i>Hello, World!</i> program like so:
+</p>
+
+<p class="code"><b class="directive">#include</b> &lt;iostream&gt;
+
+<b class="variable">int</b> main() {
+    std::cout << "Hello, World!\n";
+    return 0;
+};
+</p>
+
+<p>
+But I haven't found many Hello Triangle equivalents for Vulkan that I think would be suitable for a beginner.
+So I've tried to make my own which I am going to detail here.
+</p>
+
+<p class="note">
+Before we begin, a quick warning. I didn't try to do things properly, merely as fast as possible to hopefully give others a simple starting point. This code will certainly not be performant or be doing everything correctly.
+Also, even the simplest Vulkan is going to be quite verbose, you will get tired typing all this in but once set up, the jump from a triangle to a 3d world isn't as big as you might think.
+</p>
+
+<h3>Part 1 - The ingredients</h3>
+
+<p>
+I'm going to assume that you've installed the <a href="https://www.vulkan.org/">Vulkan SDK</a> and have an IDE with a C/C++ compiler ready to go. I also won't be explaining how to link all the various libraries together.
+If you don't know how to do all this already, then maybe its not quite time to jump into computer graphics.
+</p>
+
+<p>
+In addition to Vulkan and the standard library, we are also going to use four other libraries:<br/><br/>
+    - <a href="https://github.com/glfw/glfw">GLFW3</a> - handles input and window creation in an OS agnostic way<br/>
+    - <a href="https://github.com/charles-lunarg/vk-bootstrap">VkBootstrap</a> - removes several hundred lines of initial setup<br/>
+    - <a href="https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator">VMA (Vulkan Memory Allocator)</a> - makes it easier to create memory buffers for storing vertices etc on the GPU<br/>
+    - <a href="https://github.com/g-truc/glm">GLM</a> - adds some helper data structures for matrices and vertices<br/><br/>
+
+The code will be using some light C++ features, so you'll want to make sure you are using at least the C++ 20 standard which supports struct initializers.
+</p>
+
+<h3>Part 2 - The code</h3>
+
+<p>
+We add the standard libraries we are going to use:
+</p>
+
+<p class="code"><b class="directive">#include</b> &lt;fstream&gt; <i class="comment">// this is for loading shaders (the code that runs on the gpu)</i>
+<b class="directive">#include</b> &lt;assert.h&gt; <i class="comment">// this is for checking the results of Vulkan calls</i>
+<b class="directive">#include</b> &lt;vector&gt;
+<b class="directive">#include</b> &lt;array&gt;
+</p>
+
+<p>
+Then, we add the extra libraries and a little helper preprocessor macro:
+</p>
+
+<p class="code"><b class="directive">#include</b> &lt;glm/vec2.hpp&gt; <i class="comment">// we just use the 2d vertex class in this code</i>
+
+<i class="comment">// GLFW was originally made for OpenGL so this directive is required to make it support Vulkan</i>
+<b class="directive">#define</b> GLFW_INCLUDE_VULKAN
+<b class="directive">#include</b> &lt;GLFW/glfw3.h&gt;
+
+<b class="directive">#include</b> &lt;VkBootstrap.h&gt;
+
+<i class="comment">// These directives are required to make the Vulkan Memory Allocator correctly bind to the Vulkan implementation</i>
+<b class="directive">#define</b> VMA_STATIC_VULKAN_FUNCTIONS 0
+<b class="directive">#define</b> VMA_DYNAMIC_VULKAN_FUNCTIONS 1
+<b class="directive">#define</b> VMA_IMPLEMENTATION
+<b class="directive">#include</b> &lt;vk_mem_alloc.h&gt;
+
+<i class="comment">// This will be used to wrap Vulkan calls to trigger an error if something has gone wrong, it'll be a lot harder to spot bugs without it</i>
+<b class="directive">#define</b> VK_CHECK(x) {<b class="variable">VkResult</b> err = x; assert(err == VK_SUCCESS);}
+</p>
+
+<p>
+Before the main function, we define a small function to help load shader files:
+</p>
+
+<p class="code"><b class="variable">std::vector&lt;char&gt;</b> load_shader(<b class="variable">std::string</b> filename) {
+    <b class="variable">std::ifstream</b> file(filename, std::ios::ate | std::ios::binary);
+    assert (file.is_open());
+    <b class="variable">std::vector&lt;char&gt;</b> buffer(file.tellg());
+    file.seekg(0);
+    file.read(buffer.data(), buffer.size());
+    file.close();
+    return buffer;
+}
+</p>
+
+<p class="note">
+The shader code will be shown after the application code has been finished.
+</p>
+
+<p>
+Into the main function now, where we initialize GLFW3 and create the window we are going to render into:
+</p>
+
+<p class="code"><b class="variable">int</b> main() {
+    glfwInit();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); <i class="comment">// GLFW_NO_API as we aren't using any OpenGL functionality</i>
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE); <i class="comment">// disable resizing so there is one less thing to worry about</i>
+
+    <b class="variable">std::string</b> app_name = "whatever name you want";
+    <b class="variable">unsigned int</b> width = 800;
+    <b class="variable">unsigned int</b> height = 600;
+    <b class="variable">GLFWwindow</b> * window = glfwCreateWindow(width, height, app_name.c_str(), nullptr, nullptr);
+</p>
+
+<p class="note">
+If you ran the code so far (and added <b>return 0;}</b> to the end so it would compile) a blank window with the title <i>whatever name you want</i> would pop up and then suddenly disappear as the application exited.
+</p>
+
+<p>
+We are about to get into the nasty and verbose boilerplate setup code but first we define all the variables our application is going to be using afterwards:
+</p>
+
+<p class="code">    <i class="comment">// these are all VkBootstrap specific variables</i>
+    <b class="variable">vkb::Instance</b> instance;
+    <b class="variable">vkb::Device</b> device;
+    <b class="variable">vkb::DispatchTable</b> dispatch_table; <i class="comment">// this contains functions pointers bound to the Vulkan implementation</i>
+    <i class="comment">//the swapchain controls giving us an image to draw to, while rendering the last one we already drew to</i>
+    <b class="variable">vkb::Swapchain</b> swapchain;
+
+    <i class="comment">// These are VulkanMemoryAllocator specific variables - you'll see how they are used later</i>
+    <b class="variable">VmaAllocator</b> allocator;
+    <b class="variable">VmaAllocation</b> vertex_buffer_allocation;
+    
+    <i class="comment">// These are raw Vulkan varibles</i>
+    <b class="variable">VkQueue</b> graphics_queue; <i class="comment">// this is a handle to the part of the GPU that can take graphics instructions</i>
+    <b class="variable">VkSurfaceKHR</b> surface; <i class="comment">// this is the part of the window created above where our rendered image will be going</i>
+    <b class="variable">VkCommandPool</b> command_pool; <i class="comment">// this is what the command_buffer below is created from</i>
+    <b class="variable">VkCommandBuffer</b> command_buffer; <i class="comment">// this is what we'll be giving draw commands to</i>
+    <b class="variable">VkSemaphore</b> swapchain_semaphore; <i class="comment">// this is necessary to ensure its safe to grab an image to draw from</i>
+    <b class="variable">VkPipelineLayout</b> pipeline_layout; <i class="comment">// we don't do much with this but we've got to have it</i>
+    <b class="variable">VkPipeline</b> pipeline; <i class="comment">// the pipeline defines how vertices are handled, what shader programs are run etc</i>
+    <b class="variable">VkBuffer</b> vertex_buffer; <i class="comment">// this will hold the triangle vertices</i>
+</p>
+
+<p>
+Here we go, the dreaded boilerplate (albeit reduced thanks the VkBootstrap and VMA). Vulkan likes to take structs as parameters to its API so there are going to be a lot of them.
+</p>
+
+<p>
+We create the vulkan instance (you can have multiple instances talking to multiple graphics cards) and the link to the vulkan device (GPU) we will be using. VkBootstrap makes this reasonably simple:
+</p>
+
+<p class="code">    <i class="comment">// Note: this section is wrapped in brackets to prevent all the temporary variables from hanging around</i>
+    { 
+        <b class="variable">vkb::InstanceBuilder</b> builder;
+        instance = builder.set_app_name(app_name.c_str())
+            .request_validation_layers() <i class="comment">// this is an optional feature that prints very useful debug messages</i>
+            .use_default_debug_messenger() <i class="comment">// this tells the validation layer to use the standard output</i>
+            .require_api_version(1,3,0) <i class="comment">// this is saying we want vulkan 1.3 (which is a little simpler to use)</i>
+            .build().value();
+
+        <b class="variable">vkb::PhysicalDeviceSelector</b> selector{instance};
+ 
+        glfwCreateWindowSurface(instance.instance, window, nullptr, &surface);
+
+        <i class="comment">// this is creating a description of what kind of device we want to use</i>
+        <b class="variable">vkb::PhysicalDevice</b> physical_device = selector
+            .set_minimum_version(1, 3)
+            .set_required_features_13(<b class="variable">VkPhysicalDeviceVulkan13Features</b> {
+                .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+                .synchronization2 = true,
+                <i class="comment">// this removes the need for renderpasses, further simplifying setup</i>
+                .dynamicRendering = true
+            })
+            .set_required_features_12(<b class="variable">VkPhysicalDeviceVulkan12Features</b> {
+                .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+                .descriptorIndexing = true,
+                .bufferDeviceAddress = true
+            })
+            .set_surface(surface)
+            .select()
+            .value();
+
+        <i class="comment">// this will give us a handle to a device that meets the above criteria</i>
+        <b class="variable">vkb::DeviceBuilder</b> device_builder {physical_device};
+        device = device_builder.build().value();
+
+        <i class="comment">// bind the vulkan api function pointers to the vulkan implementation</i>
+        dispatch_table = device.make_table();
+</p>
+
+<p>
+At this point we have established a link to the GPU, next we have to create the means by which we can submit drawing commands to it:
+</p>
+
+<p class="code">        <i class="comment">// we want the graphics queue, if we were doing compute work, we'd ask for the compute queue</i>
+        graphics_queue = device.get_queue(vkb::QueueType::graphics).value();
+        <b class="variable">VkCommandPoolCreateInfo</b> command_pool_create_info {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+            .pNext = nullptr,
+            <i class="comment">// this means we'll be resetting the command buffer frequently</i>
+            .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+            .queueFamilyIndex = device.get_queue_index(vkb::QueueType::graphics).value()
+        };
+        VK_CHECK(dispatch_table.fp_vkCreateCommandPool(device.device, &command_pool_create_info, nullptr, &command_pool));
+
+        <b class="variable">VkCommandBufferAllocateInfo</b> command_buffer_allocate_info {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+            .pNext = nullptr,
+            .commandPool = command_pool,
+            .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY, <i class="comment">// there are secondary level buffers too but we don't need to worry about them</i>
+            .commandBufferCount = 1 <i class="comment">// we are just creating 1 buffer</i>
+        };
+        VK_CHECK(dispatch_table.fp_vkAllocateCommandBuffers(device.device, &command_buffer_allocate_info, &command_buffer));
+</p>
+
+<p>
+We now can send drawing commands to the GPU but we haven't set up the graphics pipeline yet which we need to  or we won't be able to see anything, so next let's make the swapchain:
+</p>
+
+<p class="code">        <i class="comment">// semaphores are used for synchronization to prevent us accessing resources when they aren't ready</i>
+        <i class="comment">// this semaphore will be passed to the swapchain to tell us when it's safe to grab an image from it</i>
+        <b class="variable">VkSemaphoreCreateInfo</b> semaphore_create_info {
+            .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
+        };
+        VK_CHECK(dispatch_table.fp_vkCreateSemaphore(device.device, &semaphore_create_info, nullptr, &swapchain_semaphore));
+
+        <i class="comment">// the swapchain handles what image is currently being rendered, and what image is currently being drawn to</i>
+        <b class="variable">vkb::SwapchainBuilder</b> swapchain_builder {device, surface};
+        swapchain = swapchain_builder
+            .set_desired_format({.format = VK_FORMAT_B8G8R8A8_UNORM}) <i class="comment">// the colour format we want</i>
+            <i class="comment">// this mode means the swapchain will wait for the vertical blank before switching the images</i>
+            .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+            .set_desired_extent(width, height)
+            .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+            .build().value();
+</p>
+
+<p>
+Now here is the biggest single section, where we create the graphics pipeline and load the shaders:
+</p>
+
+<p class="code">        <i class="comment">// the pipeline object needs a pipeline_layout object as a parameter</i>   
+        <b class="variable">VkPipelineLayoutCreateInfo</b> pipeline_layout_create_info {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO
+        };
+        VK_CHECK(dispatch_table.fp_vkCreatePipelineLayout(device.device, &pipeline_layout_create_info, nullptr, &pipeline_layout));
+
+        <i class="comment">// the vertex binding description tells the shaders how vertex data is stored</i>
+        <i class="comment">// the key value here is the stride which is saying that there is a vertex at </i>
+        <i class="comment">// every offset of sizeof(glm::vec2) in the vertex buffer</i>
+        <i class="comment">// which we'll populate later</i>
+        <b class="variable">VkVertexInputBindingDescription</b> vertex_binding_description = {
+            .binding = 0,
+            .stride = sizeof(glm::vec2),
+            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+        };
+
+        <i class="comment">// this is saying the data format of the vertex and where they start in the buffer</i>
+        <b class="variable">VkVertexInputAttributeDescription</b> vertex_attribute_description = {
+            .location = 0,
+            .binding = 0,
+            <i class="comment">// 2d vertices so two 32 bit channels should suffice</i>
+            .format = VK_FORMAT_R32G32_SFLOAT,
+            .offset = 0
+        };
+
+        <b class="variable">VkPipelineVertexInputStateCreateInfo</b> vertex_input_state_create_info {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+            .vertexBindingDescriptionCount = 1,
+            .pVertexBindingDescriptions = &vertex_binding_description,
+            .vertexAttributeDescriptionCount = 1,
+            .pVertexAttributeDescriptions = &vertex_attribute_description
+        };
+
+        <b class="variable">VkPipelineInputAssemblyStateCreateInfo</b> input_assembly_state_create_info {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+        };
+
+        <b class="variable">VkPipelineViewportStateCreateInfo</b> viewport_state_create_info {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+            .viewportCount = 1,
+            .scissorCount = 1
+        };
+
+        <b class="variable">VkPipelineRasterizationStateCreateInfo</b> rasterization_state_create_info {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+            .depthClampEnable = VK_FALSE,
+            .rasterizerDiscardEnable = VK_FALSE,
+            .polygonMode = VK_POLYGON_MODE_FILL,
+            .depthBiasEnable = VK_FALSE,
+            .lineWidth = 1.f
+        };
+
+        <i class="comment">// we are using dynamic mode from vulkan 1.3 so we need to say what aspect need to be dynamic</i>
+        <b class="variable">std::vector&lt;VkDynamicState&gt;</b> dynamic_states = {
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR,
+            VK_DYNAMIC_STATE_CULL_MODE,
+            VK_DYNAMIC_STATE_FRONT_FACE,
+            VK_DYNAMIC_STATE_PRIMITIVE_TOPOLOGY
+        };
+
+        <b class="variable">VkPipelineDynamicStateCreateInfo</b> dynamic_state_info {
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+            .dynamicStateCount = static_cast<uint32_t>(dynamic_states.size()),
+            .pDynamicStates = dynamic_states.data()
+        };
+
+        <i class="comment">// finally, we load our shader programs</i>
+        <b class="variable">auto</b> vertex_shader_binary = load_shader("vertex.spv");
+        <b class="variable">auto</b> frag_shader_binary = load_shader("fragment.spv");
+
+        <b class="variable">VkShaderModuleCreateInfo</b> vertex_shader_module_create_info = {
+            .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            .codeSize = vertex_shader_binary.size(),
+            .pCode = reinterpret_cast&lt;<b class="variable">const uint32_t</b>*&gt;(vertex_shader_binary.data())
+        };
+
+        <b class="variable">VkShaderModuleCreateInfo</b> frag_shader_module_create_info = {
+            .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            .codeSize = frag_shader_binary.size(),
+            .pCode = reinterpret_cast&lt;<b class="variable">const uint32_t</b>*&gt;(frag_shader_binary.data())
+        };
+
+        <b class="variable">VkShaderModule</b> vertex_shader_module;
+        VK_CHECK(dispatch_table.fp_vkCreateShaderModule(device.device, &vertex_shader_module_create_info, nullptr, &vertex_shader_module));
+
+        <b class="variable">VkShaderModule</b> frag_shader_module;
+        VK_CHECK(dispatch_table.fp_vkCreateShaderModule(device.device, &frag_shader_module_create_info, nullptr, &frag_shader_module));
+
+        <b class="variable">std::array&lt;VkPipelineShaderStageCreateInfo, 2&gt;</b> shader_stages = {
+            <b class="variable">VkPipelineShaderStageCreateInfo</b> {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .stage = VK_SHADER_STAGE_VERTEX_BIT,
+                .module = vertex_shader_module,
+                .pName = "main"
+            },
+            <b class="variable">VkPipelineShaderStageCreateInfo</b> {
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+                .module = frag_shader_module,
+                .pName = "main"
+            }
+        };
+
+        <b class="variable">VkGraphicsPipelineCreateInfo</b> graphics_pipeline_create_info = {
+            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT,
+            .stageCount = static_cast<uint32_t>(shader_stages.size()), // vertex and fragment stages
+            .pStages = shader_stages.data(), // to add
+            .pVertexInputState = &vertex_input_state_create_info,
+            .pInputAssemblyState = &input_assembly_state_create_info,
+            .pViewportState = &viewport_state_create_info,
+            .pRasterizationState = &rasterization_state_create_info,
+            .pDynamicState = &dynamic_state_info,
+            .layout = pipeline_layout
+        };
+        VK_CHECK(dispatch_table.fp_vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, nullptr, &pipeline));
+
+        <i class="comment">// once bound to the pipeline, you can safely destroy the shader modules</i>
+        dispatch_table.fp_vkDestroyShaderModule(device.device, frag_shader_module, nullptr);
+        dispatch_table.fp_vkDestroyShaderModule(device.device, vertex_shader_module, nullptr);
+</p>
+
+<p>
+We now have the device, the command buffer and the graphics pipeline ready - the last part before we can start drawing is to create and populate the vertex buffer:
+</p>
+
+<p class="code">        <i class="comment">// the vertices that make up the triangle you are going to see soon </i>
+        <b class="variable">std::vector&lt;glm::vec2&gt;</b> vertices = {
+            glm::vec2(0.0f, -0.5f),
+            glm::vec2(0.5f, 0.5f),
+            glm::vec2(-0.5f, 0.5f)
+        };
+
+        <b class="variable">VmaVulkanFunctions</b> vulkan_functions
+        {
+            .vkGetInstanceProcAddr = instance.fp_vkGetInstanceProcAddr,
+            .vkGetDeviceProcAddr = instance.fp_vkGetDeviceProcAddr
+        };
+
+        <b class="variable">VmaAllocatorCreateInfo</b> allocator_info {
+            .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+            .physicalDevice = device.physical_device,
+            .device = device.device,
+            .pVulkanFunctions = &vulkan_functions,
+            .instance = instance.instance
+        };
+
+        vmaCreateAllocator(&allocator_info, &allocator);
+
+        <b class="variable">VkBufferCreateInfo</b> buffer_info = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+            .size = vertices.size() * sizeof(glm::vec2),
+            .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+        };
+
+        <b class="variable">VmaAllocationCreateInfo</b> vma_alloc_create_info {
+            .usage = VMA_MEMORY_USAGE_CPU_TO_GPU
+        };
+
+        VK_CHECK(vmaCreateBuffer(allocator, &buffer_info, &vma_alloc_create_info, &vertex_buffer, &vertex_buffer_allocation, nullptr));
+
+        <i class="comment">// this is how you transfer data from the host (cpu) to the device (gpu)</i>
+        {
+            <b class="variable">void</b> *data;
+            vmaMapMemory(allocator, vertex_buffer_allocation, &data);
+            memcpy(data, vertices.data(), vertices.size() * sizeof(glm::vec2));
+            vmaUnmapMemory(allocator, vertex_buffer_allocation);
+        }
+    } <i class="comment">// we are now leaving the scope brackets surrounding the infamous Vulkan boilerplate</i>
+</p>
+
+<p>
+Now the drawing code:
+</p>
+
+<p class="code">    <b class="variable">std::vector&lt;VkImageView&gt;</b> image_views = swapchain.get_image_views().value();
+
+    while(glfwWindowShouldClose(window) == false) {
+        <i class="comment">// this is not best practice but it saves us creating more fences and semaphores to keep things simple</i>
+        <i class="comment">// replace these with fences or semaphores when you start getting deeper into Vulkan</i>
+        VK_CHECK(dispatch_table.fp_vkDeviceWaitIdle(device.device));
+
+        <b class="variable">uint32_t</b> swapchain_image_index;
+        <i class="comment">// 1000000000 is the number of nano seconds it'll wait to acquire the image </i>
+        VK_CHECK(dispatch_table.fp_vkAcquireNextImageKHR(device.device, swapchain.swapchain, 1000000000, swapchain_semaphore, VK_NULL_HANDLE, &swapchain_image_index));
+
+        VK_CHECK(dispatch_table.fp_vkResetCommandBuffer(command_buffer, 0));
+
+        <b class="variable">VkCommandBufferBeginInfo</b> command_buffer_begin_info {
+            .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+            .pNext = nullptr,
+            .flags = 0,
+            .pInheritanceInfo = nullptr,
+        };
+        VK_CHECK(dispatch_table.fp_vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info));
+
+        <b class="variable">VkRenderingAttachmentInfo</b> color_attachment {
+            .sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+            .imageView   = image_views[swapchain_image_index],
+            .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp      = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp     = VK_ATTACHMENT_STORE_OP_STORE,
+            .clearValue  = <b class="variable">VkClearValue</b> {
+                .color = <b class="variable">VkClearColorValue</b> {
+                    .float32 = {0.0f, 0.0f, 0.0f, 1.0f}
+                }
+            }
+        };
+
+        <b class="variable">VkRenderingInfo</b> rendering_info {
+            .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+            .renderArea = <b class="variable">VkRect2D</b> {
+                .offset = {0,0},
+                .extent = <b class="variable">VkExtent2D</b> {
+                    .width = width,
+                    .height = height
+                },
+            },
+            .layerCount = 1,
+            .colorAttachmentCount = 1,
+            .pColorAttachments = &color_attachment
+        };
+        dispatch_table.fp_vkCmdBeginRendering(command_buffer, &rendering_info);
+
+        dispatch_table.fp_vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+
+        <b class="variable">VkViewport</b> viewport {
+            .x = 0,
+            .y = 0,
+            .width = static_cast&lt;<b class="variable">float</b>&gt;(width),
+            .height = static_cast&lt;<b class="variable">float</b>&gt;(height),
+            .minDepth = 0.f,
+            .maxDepth = 1.f
+        };
+        dispatch_table.fp_vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+
+        <b class="variable">VkRect2D</b> scissor = {
+            .extent = <b class="variable">VkExtent2D</b> {width, height}
+        };
+
+        dispatch_table.fp_vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+        dispatch_table.fp_vkCmdSetCullMode(command_buffer, VK_CULL_MODE_NONE);
+        dispatch_table.fp_vkCmdSetFrontFace(command_buffer, VK_FRONT_FACE_CLOCKWISE);
+        dispatch_table.fp_vkCmdSetPrimitiveTopology(command_buffer, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+
+        <b class="variable">VkDeviceSize</b> offset = 0;
+        vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffer, &offset);
+        dispatch_table.fp_vkCmdDraw(command_buffer, 3, 1, 0, 0);
+
+        dispatch_table.fp_vkCmdEndRendering(command_buffer);
+
+        VK_CHECK(dispatch_table.fp_vkEndCommandBuffer(command_buffer));
+        <b class="variable">VkSubmitInfo</b> submit_info = {
+            .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+            .pNext = nullptr,
+            .waitSemaphoreCount = 0,
+            .pWaitSemaphores = nullptr,
+            .pWaitDstStageMask = nullptr,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &command_buffer,
+            .signalSemaphoreCount = 0,
+            .pSignalSemaphores = nullptr
+        };
+        VK_CHECK(dispatch_table.fp_vkQueueSubmit(graphics_queue, 1, &submit_info, VK_NULL_HANDLE));
+        
+        <b class="variable">VkPresentInfoKHR</b> present_info = {
+            .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+            .pNext = nullptr,
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &swapchain_semaphore,
+            .swapchainCount = 1,
+            .pSwapchains = &swapchain.swapchain,
+            .pImageIndices = &swapchain_image_index
+        };
+        VK_CHECK(dispatch_table.fp_vkQueuePresentKHR(graphics_queue, &present_info));
+
+        VK_CHECK(dispatch_table.fp_vkDeviceWaitIdle(device.device));
+
+        glfwPollEvents();
+    }
+</p>
+
+<p class="note">
+At this point the program will be rendering a triangle (assuming the shaders were created).
+</p>
+
+<p>
+The last part of the application code is just the cleanup:
+</p>
+
+<p class="code">
+    {
+        <i class="comment">// wait till the gpu is finished doing work before cleaning up</i>
+        VK_CHECK(dispatch_table.fp_vkDeviceWaitIdle(device.device));
+        
+        vmaDestroyBuffer(allocator, vertex_buffer, vertex_buffer_allocation);
+        dispatch_table.fp_vkDestroyPipeline(device.device, pipeline, nullptr);
+        dispatch_table.fp_vkDestroyPipelineLayout(device.device, pipeline_layout, nullptr);
+        dispatch_table.fp_vkDestroyCommandPool(device.device, command_pool, nullptr);
+        dispatch_table.fp_vkDestroySemaphore(device.device, swapchain_semaphore, nullptr);
+        for (<b class="variable">auto&</b> image_view : image_views) {
+            dispatch_table.fp_vkDestroyImageView(device.device, image_view, nullptr);
+        }
+        vkb::destroy_swapchain(swapchain);
+        vmaDestroyAllocator(allocator);
+        vkb::destroy_device(device);
+        vkb::destroy_surface(instance, surface);
+        vkb::destroy_instance(instance);
+    }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}
+</p>
+
+<p>
+Before I forget you need a vertex shader - let's call it basic.vert:
+</p>
+
+<p class="code">#version 450
+
+layout(location = 0) in vec2 position;
+
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+}
+</p>
+
+<p>
+and a fragment shader - let's call it basic.frag:
+</p>
+
+<p class="code">#version 450
+
+layout(location = 0) out vec4 outColor;
+
+void main() {
+    outColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+</p>
+
+<p>
+You need to compile these using the <b>glslc</b> compiler included with the VulkanSDK like so:
+</p>
+
+<p class="code">glslc basic.vert -o vertex.spv
+glslc basic.frag -o fragment.spv</p>
+
+<p>
+and make sure to place these .spv files in the same directory as the executable.
+</p>
+
+<h3>Part 3 - The Result</h3>
+
+<p>After all that work you should see the following:</p>
+
+<img src="content/images/vulkan/red_triangle.png" alt="the output of our vulkan hello, triangle application"  width="500px" />

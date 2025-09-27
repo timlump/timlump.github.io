@@ -61,8 +61,7 @@ Next step is turning this sample into audio.
 It's actually surprisingly easy to turn samples into audio using the python library scipy. I convert each octal value i've recorded into three 1-bit samples and pass them to a function like this:
 </p>
 
-<p class="code">
-write("output.wav", rate, np.array(samples).astype(np.float32))
+<p class="code">write("output.wav", rate, np.array(samples).astype(np.float32))
 </p>
 
 <p>
@@ -79,8 +78,7 @@ What comes out at this point is fairly unintelligible but that is not unexpected
 That is a text book example of an RC passive low pass filter, the cutoff frequency is defined by a simple equation:
 </p>
 
-<p class="code">
-fc = 1/(2*pi*R*C)
+<p class="code">fc = 1/(2*pi*R*C)
 </p>
 <p>
 If we just pop in the values from the diagram we get 1591.5 Hz, which is what I applied to the audio below:
