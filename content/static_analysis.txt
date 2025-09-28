@@ -51,7 +51,7 @@ An example of such a dead end:
 </p>
 
 <p class="code">
-call dword [0x12345] <br/>
+call dword [0x12345]
 </p>
 
 <p>

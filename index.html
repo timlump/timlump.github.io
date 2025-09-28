@@ -16,6 +16,44 @@
         <table id="page_nav">
         </table>
         <script>
+            function apply_syntax_highlighting(code_element, highlight_data) {
+                content = code_element.innerHTML;
+
+                // if it starts with a newline, remove it, this allows the code to start on a newline when editing it
+                // but since we are preserving whitespace it means there isn't an empty line at the start
+                content = content.replace(/^\n/,'');
+
+                if (code_element.classList.contains("c-syntax")) {
+                    // strings - needs to be done first are it will start matching the tags being added
+                    content = content.replace(/"([^"]*)"/g, m => `<i class="string">${m}</i>`)
+
+                    // comments
+                    content = content.replace(/\/\/.*$/gm, m => `<i class='comment'>${m}</i>`);
+                    
+                    // preprocessor
+                    content = content.replace(/#include|#define|#version|#pragma/g, m => `<b class="directive">${m}</b>`);
+                    
+                    // types
+                    content = content.replace(/std::vector&lt;.*?&gt;/g, m => `<b class="variable">${m}</b>`);
+                    content = content.replace(/std::array&lt;.*?&gt;/g, m => `<b class="variable">${m}</b>`);
+
+                    if (highlight_data["c_syntax"]["types"].length > 0) {
+                        // matches if in list and not touching other alphanumeric characters
+                        const types_regex = new RegExp(`\\b(?:${highlight_data["c_syntax"]["types"].map(RegExp.escape).join('|')})\\b`, 'g');
+                        content = content.replace(types_regex, m => `<b class="variable">${m}</b>`);
+                    }
+
+                    // constants
+                    if (highlight_data["c_syntax"]["constants"].length > 0) {
+                        // matches if in list and not touching other alphanumeric characters
+                        const constants_regex = new RegExp(`\\b(?:${highlight_data["c_syntax"]["constants"].map(RegExp.escape).join('|')})\\b`, 'g');
+                        content = content.replace(constants_regex, m => `<b class="constant">${m}</b>`);
+                    }
+                }
+
+                code_element.innerHTML = content;
+            }
+
             function load_article(name) {
                 let filename = `content/${name}`;
 
@@ -28,8 +66,17 @@
                     .then(response => response.text())
                     .then((data) => {
                         let element = document.getElementById(filename);
-                        console.log(element);
                         element.innerHTML = data;
+
+                        // need to load the syntax highlighting json to know what to highlight
+                        fetch(`highlight_data.json`)
+                            .then(response => response.json())
+                            .then((type_data) => {
+                                let code_elements = element.getElementsByClassName("code");
+                                for (let i = 0; i < code_elements.length; i++) {
+                                    apply_syntax_highlighting(code_elements[i], type_data);
+                                }
+                            })
                     });
             }
 

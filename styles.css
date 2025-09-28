@@ -121,6 +121,14 @@ body {
         color:red;
     }
 
+    .constant {
+        color: orchid;
+    }
+
+    .string {
+        color: yellow;
+    }
+
     audio {
         display: block;
         margin:auto;

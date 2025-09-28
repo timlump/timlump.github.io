@@ -16,7 +16,7 @@ This machine unlike the Portfolio uses a proper version of DOS so loads of old p
 If you're interested in how I did this, here is the code:
 </p>
 
-<p class="code">#include &lt;stdio.h&gt;
+<p class="code c-syntax">#include &lt;stdio.h&gt;
 #include &lt;math.h&gt;
 
 void set_graphics_mode();
