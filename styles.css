@@ -97,6 +97,7 @@ body {
         border-style: solid;
         padding-left: 10px;
         white-space: pre-wrap;
+        word-wrap: break-word;
     }
 
     .note {
