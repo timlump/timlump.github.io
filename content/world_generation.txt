@@ -1,0 +1,30 @@
+<h2><a href="/?article=world_generation.txt">World building</a></h2>
+
+<p>
+Many years ago, one of my favourite games to play was Garry's mod, a sandbox built on the half-life 2 engine where you could pose characters, build contraptions and play mini-mods adding whole new game modes.
+The mini-mod that I played the most by far was Spacebuild, where you would start on a tiny map representing Earth, build a space ship with elaborate life support systems and travel to other tiny maps representing other planets.
+</p>
+
+<p>
+I have so many memories of Spacebuild, that I still remember fondly two decades later. A particularly strong memory is of one game where myself and a friend assembled a kind of borg cube and began a journey to the Spacebuild equivalent of Jupiter which unlike the real planet you could land on but without advanced life support (which thankfully we had built) you would be crushed into meaty chunks the moment you touched the atmosphere.
+</p>
+
+<p>
+Just as we took off, another player asked if he could join us, so we hastily welded a chair between ours and set off. I had forgotten however, that shortly beforehand I had been experimenting with welds that could be broken with some force (by default they never broke) to see if I could make little rockets that could be launched for space battles, and this third chair had been welded in with one of these breakable welds. As we reached Jupiter, I made a quick course correction which jolted the ship, breaking the weld and launching the third player beyond the boundary of our life support where they promptly exploded like confetti.
+</p>
+
+<p>
+You might be surprised to learn from my description just how primitive the representation of space was in this game. The planets were not spheres where you could land anywhere but rather circular platforms perhaps a couple of hundred metres across with a spherical facade surrounding it to give the illusion of it being a planet. Inside this sphere, while standing on the platform it would appear to have a sky but outside it would look like a planet. If you are having trouble visualizing that, here is a rough sketch:
+</p>
+
+<img src="content/images/world_building/spacebuild_planet.png" alt="a platform within a sphere" width="500px"/>
+
+<p>
+Planets were like this, I presume due to the limitations of the engine. You couldn't make massive solar systems in it and gravity was not a local phenomena that would allow you to orient yourself around the core of any planet but something global applied across the entire level. No matter where you were, you always fell <b>down</b>. However despite these limitations, I never had as much fun in a space game as I did in Garry's Mod - Spacebuild. One day I would like to replicate this experience but with better planets.
+</p>
+
+<p>
+A while back I took a crack at this and I made a prototype planet generator which can represent a planet from a distance as a perfect sphere but with rough detailed terrain up close. It does this using tesselation where from a distance the planet uses very few vertices but as you approach the surface, the triangles closest to you are further and further subdivided to increase the resolution. However, without any sort of terrain data to offset these vertices, this would just generate a more and more perfectly spherical surface. I chose to use perlin noise to modulate the surface (one of the first techniques to generate high quality noise in computer graphics) and procedurally generate reasonably convincing terrain. Here it is in action:
+</p>
+
+<img src="content/images/world_building/terra.gif" alt="the world generation in action" width="500px"/>
