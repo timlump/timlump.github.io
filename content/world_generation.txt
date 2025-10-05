@@ -24,7 +24,29 @@ Planets were like this, I presume due to the limitations of the engine. You coul
 </p>
 
 <p>
-A while back I took a crack at this and I made a prototype planet generator which can represent a planet from a distance as a perfect sphere but with rough detailed terrain up close. It does this using tesselation where from a distance the planet uses very few vertices but as you approach the surface, the triangles closest to you are further and further subdivided to increase the resolution. However, without any sort of terrain data to offset these vertices, this would just generate a more and more perfectly spherical surface. I chose to use perlin noise to modulate the surface (one of the first techniques to generate high quality noise in computer graphics) and procedurally generate reasonably convincing terrain. Here it is in action:
+A while back I took a crack at this and made a prototype planet generator which you can see here in action:
 </p>
 
 <img src="content/images/world_building/terra.gif" alt="the world generation in action" width="500px"/>
+
+<p>
+You can see that from a distance the planet is relatively low resolution but as the camera gets closer the triangles start subdividing and more detail begins to appear. This is called tesselation. Modern graphics pipelines actually have tesselation shaders to do this fairly fast but in my example I used the cpu as it was good enough for this demo.
+</p>
+
+<img src="content/images/world_building/tesselation.jpg" alt="diagram roughly illustrating tesslation" width="500px"/>
+
+<p>
+Tesselation by itself wouldn't give us any terrain detail though, it would just produce a more perfect sphere as extra vertices would match the curve of the surface better.
+</p>
+
+<img src="content/images/world_building/curve.jpg" alt="diagram roughly vertices matching a curve" width="500px"/>
+
+<p>
+To add detail to the planet we need to offset the vertices with something. We could use freely available depth images of the Earth's surface although they'd need to be very high resolution for small surface details (imagine how many square metres a single pixel might represent). I instead used a procedural method that generates terrain on the fly allowing practically infinite detail for very little memory usage. Specifically, I used perlin noise. This is a technique invented by Ken Perlin in 1983 which for the first time allowed natural looking pseudorandom noise to be created and proved so invaluable to computer graphics that it won him a technical academy award. It's also baked into the linear algebra library I used so I didn't even need to implement it.
+</p>
+
+<img src="content/images/world_building/noise_terrain.jpg" alt="noise being used to offset the vertices" width="500px"/>
+
+<p>
+Now I just need to replicate the rest of Spacebuild.
+</p>
