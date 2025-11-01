@@ -1,0 +1,277 @@
+<h2><a href="/?article=chess.txt">Never let your opponent see your pieces</a></h2>
+
+<p>
+Back in 2020 there was a massive surge in interest in chess after the release of the show The Queen's Gambit.
+I wasn't immune to this hype and like everyone else of course I played many games of chess online with friends during the first covid lockdown. I even started reading some books on chess strategy (in the end I just learned some basic rules on how to play a competent game so I wouldn't embarass myself).
+
+A lot of my projects around this time became chess themed as a result, for example when experimenting with bare metal programming on the playstation I was loading chess piece models I had made in Blender and I even entertained myself with the idea of making some whacky chess game. 
+
+Some of the game modes I imagined where:
+<br/>
+<br/>
+- Real-time chess - move whenever and as often as you want, fastest wins.<br/>
+- Predator chess - a normal army versus a single king defended by an invisible queen.<br/>
+- Chaos chess - both armies start the game right beside each other.<br/>
+</p>
+
+<p>
+I didn't actually make these chess variants but I did discover some people had already made some pretty cool sequels to chess such as <a href="https://store.steampowered.com/app/314340/Chess_2_The_Sequel/">Chess 2 : The Sequel</a> or <a href="https://store.steampowered.com/app/1349230/5D_Chess_With_Multiverse_Time_Travel/">5D Chess with Multiverse Time Travel</a>.
+
+In 2021 I got a raspberry PI 400 (the raspberry pi built into a keyboard like old school computers such as the Atari 400/800, Commodore VIC-20/64 or Amiga) which for about a year I used as my primary pc as I was quite into electronics at that time and really appreciated a computer with built in GPIO to interface with various projects. However, my background is in graphics so of course I also wanted to test out its rendering prowess so I built a little engine using OpenGL ES (based on some of the techniques I found <a href="https://github.com/lettier/3d-game-shaders-for-beginners"?>here</a>) and of course it was chess themed.
+</p>
+
+<p>
+Anyway, I thought this project had some pretty cool features that others might find interesting and/or useful to read about so here we are. However, it has been over 4 years since I last touched this code and when I first started writing this article I couldn't figure out how to get the chess pieces to appear hence my use of the Futurama quote in the title.
+</p>
+
+<img src="content/images/chess/chess_board_blank.png" alt="the chess board when the application first opens" width="500px"/>
+
+<p>
+Looking through the code I remembered that I had integrated lua scripting into the engine and connected it to a dropdown console I made:
+</p>
+
+<p class="code">
+mesh.create("piece","meshes/knight.bin")
+mesh.set_shader("piece",0,"piece_shader")
+</p>
+
+<p>
+here it is in action:
+</p>
+
+<img src="content/images/chess/chess_console_1.gif" alt="using the console to make a piece appear" width="500px"/>
+
+<p>
+The dropdown console was surprisingly simple to implement. It's just a rectangular primitive that can be shown or hidden by pressing the ` key:
+</p>
+
+<p class="code c-syntax">
+case GLFW_KEY_GRAVE_ACCENT:
+{
+    if (action == GLFW_PRESS) {
+        console::console * console = console::console::get();
+        console->m_visible = !console->m_visible;
+    }
+} break;
+</p>
+
+<p>
+Here is the console class:
+</p>
+
+<p class="code c-syntax">
+#include "mesh.h"
+
+namespace console
+{
+    class console
+    {
+        public:
+            static console* get();
+            static void release();
+
+            void draw();
+
+            bool m_visible = false;
+            std::shared_ptr&lt;graphics::shader&gt; m_shader = nullptr;
+
+            void insert_character(unsigned int codepoint);
+            void backspace();
+            void enter();
+
+        private:
+            GLuint m_text_texture;
+
+            static console *s_console;
+            console();
+            ~console();
+            std::shared_ptr&lt;graphics::mesh_data&gt; m_screen_rect = nullptr;
+
+            std::string m_current_line = "";
+            std::vector&lt;std::string&gt; m_history = {"", "", "", "", "", ""};
+    };
+}
+</p>
+
+<p>
+Quickly running through this code we have some variables holding the current and previous commands, some functions to add/remove characters and to submit the current command to the lua interpreter.
+You might notice it takes unsigned int <i>codepoints</i> instead of characters. This is because the console supports unicode rather than ascii although I never used anything other than the basic alphanumeric characters, this was just future proofing.
+The command history and current line are rendered to a texture which is then applied to the rectangle.
+</p>
+
+<p class="code c-sytax">
+void console::draw()
+    {
+        if (m_shader && m_visible)
+        {
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_CULL_FACE);
+            m_screen_rect->refresh(m_shader);
+
+            GLint colour_location = glGetUniformLocation(m_shader->m_shader_program, "colour_tex");
+
+            if (colour_location >= 0) {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, m_text_texture);
+                std::string console_text = m_current_line;
+                for (int idx = 0 ; idx < m_history.size() ; idx++) {
+                    console_text += "\n" + m_history[idx];
+                }
+
+                auto result = utils::text_to_image(console_text, 1024, 256, 32);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 256, 0, GL_RED, GL_UNSIGNED_BYTE, result.data());
+                glUniform1i(colour_location, 0);
+            }
+
+            m_screen_rect->draw();
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+        }
+    }
+</p>
+
+<p>
+The lua binding is just a simple wrapper around lua5.1:
+</p>
+
+<p class="code c-syntax">
+#pragma once
+extern "C" {
+    #include &lt;lua5.1/lua.h>
+    #include &lt;lua5.1/lualib.h>
+    #include &lt;lua5.1/lauxlib.h>
+}
+
+#include &lt;string&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+#include &lt;exception&gt;
+
+namespace binding
+{
+    class lua
+    {
+        private:
+            lua();
+            ~lua();
+            static lua * s_lua;
+            lua_State * m_state = nullptr;
+
+        public:
+            static lua * get();
+            static void release();
+            bool execute(std::string filename);
+            bool execute_interactive(std::string code);
+
+            void bind(std::string namespace_name, std::vector<luaL_Reg> funcs);
+            void bind(std::string name, int (*func_ptr) (lua_State*));
+    };
+}
+</p>
+
+<p>
+To expose C++ functionality to the lua interpreter so it could be scripted or run interactively in the console you just have to implement the functionality in c++ and register it with the interpreter.
+However, lua uses a stack based system for passing arguments so the functions would take a lua_State* as the only argument and you have to use the functions provided by the lua headers to retrieve values from the stack.
+Here is some of th mesh functionality being implemented and registered to give you an idea:
+</p>
+
+<p class="code c-syntax">
+int mesh_instance::set_shader(lua_State* state)
+    {
+        std::string mesh_name = luaL_checkstring(state, 1);
+        int layer = luaL_checkinteger(state, 2);
+        std::string shader_name = luaL_checkstring(state, 3);
+        
+        s_mesh_instances[mesh_name]->m_shaders_layers[layer] 
+            = graphics::shader::get_shader(shader_name);
+        return 0;
+    }
+
+    int mesh_instance::set_position(lua_State* state)
+    {
+        std::string mesh_name = luaL_checkstring(state, 1);
+        float x = luaL_checknumber(state, 2);
+        float y = luaL_checknumber(state, 3);
+        float z = luaL_checknumber(state, 4);
+
+        s_mesh_instances[mesh_name]->m_position = {x,y,z};
+        return 0;
+    }
+
+    void mesh_instance::register_lua_functions()
+    {
+        std::vector<luaL_Reg> funcs = {
+            {"create",mesh_instance::create},
+            {"set_shader",mesh_instance::set_shader},
+            {"set_position",mesh_instance::set_position}
+        };
+
+        binding::lua::get()->bind("mesh", funcs);
+    }
+</p>
+
+<p>
+I remembered adding shadow mapping as well but there were no shadows, turns out I had experimented with a reasonably complex compositor and the shadow effect had to be added through applying a shadow shader to the piece:
+</p>
+
+<img src="content/images/chess/chess_console_2.gif" alt="shadows being added" width="500px"/>
+
+<p class="note">
+Shadow mapping works by rendering the scene from the perspective of the light. We move our camera to where the light is and anything the light cannot see, we know is in shadow.
+We render a depth image of this scene and then pass it to our normal colour shader, then at each fragment we check against this depth image to see if that pixel isn't visible to the light, if its not we colour it in darker and voila we have shadow.
+</p>
+
+<p>
+The compositing works by having our scene not just render to the screen but instead to several different offscreen buffers for example a buffer just for shadows:
+</p>
+
+<p class="code c-syntax">
+void game_loop()
+{
+    graphics::compositor compositor;
+    compositor.m_shader = graphics::shader::get_shader("passthrough_shader");
+    console::console::get()->m_shader = graphics::shader::get_shader("console_shader");
+    
+    auto scene_ctx = graphics::scene::get();
+
+    int frames = 0;
+    double t0 = glfwGetTime();
+    while(not glfwWindowShouldClose(game_state.window)) {
+        ...
+        scene_ctx->draw(graphics::render_type::shadow_map, 1);    
+        scene_ctx->draw(graphics::render_type::gbuffer, 0);
+        compositor.draw();
+        console::console::get()->draw();
+
+        ...
+    }
+</p>
+
+<p>
+The engine every frame iterates through the different layers to render the different effects to the various buffers. Each mesh has to have a shader program connected with it that matches this layer in order to render to it:
+</p>
+
+<p class="code c-syntax">
+void mesh_instance::draw(int layer)
+    {
+        if (m_shaders_layers.empty()) {
+            return;
+        }
+
+        auto shader = m_shaders_layers.find(layer);
+        if (shader == m_shaders_layers.end()) {
+            return;
+        }
+
+        ...
+    }
+</p>
+
+<p>
+After all the buffers are populated, we combine them together into a single texture which we render to a rectangle that takes up the full screen to display the final image.
+</p>
+
+<p>
+Overall I was pretty impressed by the raspberry PI 400's performance especially for a 100 euro computer with everything included even a glossy how-to programming manual although when I tried to implement screen space reflections it really struggled. If you look through the codebase <a href="https://github.com/timlump/chess/tree/main">here</a> and scroll back through the commits you can see my attempts at that.
+</p>

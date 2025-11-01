@@ -1,3 +1,4 @@
+chess.txt
 world_generation.txt
 vulkan_triangle.txt
 wireless_serial.txt
